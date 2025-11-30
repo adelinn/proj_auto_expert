@@ -1,0 +1,58 @@
+name: "Deploy frontend"
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "frontend/**"
+      - "!frontend/README.md"
+
+jobs:
+  build-and-deploy:
+    name: "Build and deploy frontend"
+    runs-on: "ubuntu-latest"
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./frontend
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test
+
+      - id: "auth"
+        uses: "google-github-actions/auth@v1"
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.SA_EMAIL }}
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Set target hosting site
+        run: |
+          cat <<'EOF' > .firebaserc
+          {
+            "projects": {},
+            "targets": {
+              "default": {
+                "hosting": [
+                  ["${{ vars.FIREBASE_HOSTING_SITE_ID }}"]
+                ]
+              }
+            },
+            "etags": {}
+          }
+          EOF
+
+      - name: Deploy hosting site
+        run: firebase deploy --only hosting

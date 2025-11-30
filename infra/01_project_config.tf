@@ -27,3 +27,9 @@ resource "google_firebase_project" "main" {
     google_project_service.main
   ]
 }
+
+resource "github_actions_variable" "gcp_project_id" {
+  repository    = local.repo_name
+  variable_name = "GCP_PROJECT_ID"
+  value         = data.google_project.main.project_id
+}

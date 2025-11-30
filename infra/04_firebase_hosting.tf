@@ -5,6 +5,12 @@ resource "google_firebase_hosting_site" "main" {
   depends_on = [google_project_service.main, google_firebase_project.main]
 }
 
+resource "github_actions_variable" "firebase_hosting_site_id" {
+  repository    = local.repo_name
+  variable_name = "FIREBASE_HOSTING_SITE_ID"
+  value         = google_firebase_hosting_site.main.site_id
+}
+
 resource "google_firebase_hosting_custom_domain" "main" {
   provider      = google-beta
   site_id       = google_firebase_hosting_site.main.site_id
