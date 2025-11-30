@@ -30,8 +30,9 @@ jobs:
           cache-dependency-path: "frontend/package-lock.json"
           cache: "npm"
       - run: npm ci
+      - run: npm run lint
       - run: npm run build --if-present
-      - run: npm test
+      - run: npm run test --if-present
 
       - id: "auth"
         uses: "google-github-actions/auth@v1"
