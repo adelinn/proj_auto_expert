@@ -58,4 +58,4 @@ jobs:
           EOF
 
       - name: Deploy hosting site
-        run: npx firebase deploy --only hosting
+        run: npx firebase deploy --only hosting --project "${{ vars.GCP_PROJECT_ID }}"
