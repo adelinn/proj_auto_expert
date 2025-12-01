@@ -10,6 +10,8 @@ resource "google_project_service" "main" {
     "dns.googleapis.com",
     # Enabling the ServiceUsage API allows the new project to be quota checked from now on.
     "serviceusage.googleapis.com",
+    "secretmanager.googleapis.com",
+    "sqladmin.googleapis.com",
   ])
   service = each.key
 

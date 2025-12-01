@@ -13,6 +13,10 @@ terraform {
       source  = "integrations/github"
       version = "~> 6.8"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.7.2"
+    }
   }
 }
 
