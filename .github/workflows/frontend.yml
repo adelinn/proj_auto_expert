@@ -47,10 +47,12 @@ jobs:
           {
             "projects": {},
             "targets": {
-              "default": {
-                "hosting": [
-                  ["${{ vars.FIREBASE_HOSTING_SITE_ID }}"]
-                ]
+              "${{ vars.GCP_PROJECT_ID }}": {
+                "hosting": {
+                  "default": [
+                    "${{ vars.FIREBASE_HOSTING_SITE_ID }}"
+                  ]
+                }
               }
             },
             "etags": {}
