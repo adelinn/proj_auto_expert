@@ -1,0 +1,21 @@
+{
+  "name": "proj_auto_expert",
+  "version": "1.0.0",
+  "description": "A driving-theory quiz app. This is part of an university project.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adelinn/proj_auto_expert.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/adelinn/proj_auto_expert/issues"
+  },
+  "homepage": "https://github.com/adelinn/proj_auto_expert#readme"
+}
