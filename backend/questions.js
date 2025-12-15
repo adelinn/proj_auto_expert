@@ -57,3 +57,5 @@ const questions = [
 ];
 
 module.exports = questions;
+
+// Acm completa eu cu încă ceva întrebarări pentru chestionar osă m-ai adug în aceste zile 
