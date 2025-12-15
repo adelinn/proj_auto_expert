@@ -67,7 +67,7 @@ app.post("/api/auth/register", async (req, res) => {
     users.push(user);
 
     res.status(201).json({
-      message: "User creat ✅",
+      message: "User creat cu succes",
       user: { id: user.id, email: user.email, name: user.name }
     });
   } catch (err) {
