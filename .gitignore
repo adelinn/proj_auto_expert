@@ -1,3 +1,6 @@
+cloud-sql-proxy.exe
+cloud-sql-proxy.x64.exe
+
 # Logs
 logs
 *.log
