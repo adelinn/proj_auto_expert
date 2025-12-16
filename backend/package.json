@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "dbp": "./cloud-sql-proxy.exe --address 127.0.0.1 --port 3306 auto-expert-479412:europe-west4:auto-expert-db",
+    "dbp": "cloud-sql-proxy.exe --address 127.0.0.1 --port 3306 auto-expert-479412:europe-west4:auto-expert-db",
     "install-cloudsql": "curl https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.20.0/cloud-sql-proxy.x64.exe -o cloud-sql-proxy.exe"
   },
   "dependencies": {
