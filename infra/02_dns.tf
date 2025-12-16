@@ -8,7 +8,11 @@ resource "google_dns_managed_zone" "main" {
 resource "google_dns_record_set" "frontend" {
   name         = "app.${google_dns_managed_zone.main.dns_name}"
   managed_zone = google_dns_managed_zone.main.name
-  type         = google_firebase_hosting_custom_domain.main.required_dns_updates[0].desired[0].records[0].type
+  type         = "cname"
   ttl          = 3600
-  rrdatas      = ["${google_firebase_hosting_custom_domain.main.required_dns_updates[0].desired[0].records[0].rdata}."]
+  rrdatas      = ["placeholder."]
+
+  lifecycle {
+    ignore_changes = [type, rrdatas]
+  }
 }
