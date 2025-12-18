@@ -8,7 +8,7 @@ const PK = 'id_user';
 
 const zUserPublic = z.object({
   id: zId,
-  email: z.string().email(),
+  email: z.email(),
   username: z.string().nullable(),
   nume: z.string().nullable(),
   telefon: z.string().nullable(),
@@ -16,7 +16,7 @@ const zUserPublic = z.object({
 });
 
 const zUserCreate = z.object({
-  email: z.string().email(),
+  email: z.email(),
   username: z.string().min(1).nullable().optional().default(null),
   parola: z.string().min(1),
   nume: z.string().min(1).nullable().optional().default(null),
@@ -26,7 +26,7 @@ const zUserCreate = z.object({
 
 const zUserUpdate = z
   .object({
-    email: z.string().email().optional(),
+    email: z.email().optional(),
     username: z.string().min(1).nullable().optional(),
     parola: z.string().min(1).optional(),
     nume: z.string().min(1).nullable().optional(),
