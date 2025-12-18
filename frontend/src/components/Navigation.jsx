@@ -25,10 +25,6 @@ function Navigation() {
         </div>
 
         <div className="absolute top-4 right-6 flex items-center gap-3">
-          <Link to="/privacy-policy" className="text-sm font-medium text-white/75 hover:underline hover:text-white/95">
-            Politica de confidențialitate
-          </Link>
-
           <div>
             {/* Account menu */}
             <AccountMenu />

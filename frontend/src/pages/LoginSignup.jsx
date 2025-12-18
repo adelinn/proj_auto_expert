@@ -124,6 +124,10 @@ export default function LoginSignup({ initialMode = 'login' }) {
               {isLogin ? 'Înregistrează-te' : 'Conectează-te'}
             </button>
           </p>
+
+          <p className="privacy-link-bottom">
+            <Link to="/privacy-policy" className="privacy-bottom-link">Politica de confidențialitate</Link>
+          </p>
         </div>
       </div>
     </div>

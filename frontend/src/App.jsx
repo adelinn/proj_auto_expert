@@ -22,9 +22,7 @@ function App() {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       </Routes>
 
-      <footer style={{position:'fixed', left:12, bottom:12, zIndex:60}}>
-        <Link to="/privacy-policy" style={{color:'rgba(255,255,255,0.75)', fontSize:13}}>Politica de confidențialitate</Link>
-      </footer>
+
     </Router>
   );
 }
