@@ -1,11 +1,15 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import Button from '../components/Button';
 import NeonBlobsBackground from '../components/NeonBlobsBackground';
 import "./LoginSignup.css";
 
-export default function LoginSignup() {
-  const [isLogin, setIsLogin] = useState(true);
+export default function LoginSignup({ initialMode = 'login' }) {
+  const [isLogin, setIsLogin] = useState(initialMode !== 'signup');
+
+  useEffect(() => {
+    setIsLogin(initialMode !== 'signup');
+  }, [initialMode]);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -28,7 +32,7 @@ export default function LoginSignup() {
     e.preventDefault();
     // TODO: Implement Firebase auth
     console.log(isLogin ? 'Login' : 'Signup', formData);
-    navigate('/');
+    navigate('/login');
   };
 
   return (
@@ -97,7 +101,7 @@ export default function LoginSignup() {
                     style={{width:18, height:18}}
                   />
                   <span>
-                    Sunt de acord cu <a href="/privacy" style={{color:'rgba(59,130,246,0.95)', textDecoration:'underline'}}>Politica de confidențialitate</a>
+                    Sunt de acord cu <Link to="/privacy-policy" style={{color:'rgba(59,130,246,0.95)', textDecoration:'underline'}}>Politica de confidențialitate</Link>
                   </span>
                 </label>
               </>
@@ -111,7 +115,8 @@ export default function LoginSignup() {
             <button
               type="button"
               onClick={() => {
-                setIsLogin(!isLogin);
+                // Navigate to the corresponding route so URL reflects mode
+                navigate(isLogin ? '/signup' : '/login');
                 setFormData({ email: '', password: '', name: '', confirmPassword: '' });
               }}
               className="toggle-btn"
