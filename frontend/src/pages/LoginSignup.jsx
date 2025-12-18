@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 import NeonBlobsBackground from '../components/NeonBlobsBackground';
+import "./LoginSignup.css";
 
 export default function LoginSignup() {
   const [isLogin, setIsLogin] = useState(true);
@@ -34,13 +35,15 @@ export default function LoginSignup() {
       <div className="login-signup-content">
         <div className="form-wrapper">
           <h1>{isLogin ? 'Conectare' : 'Înregistrare'}</h1>
-          
+          <p className="subtitle">{isLogin ? 'Introdu datele pentru a continua' : 'Completează formularul pentru a crea un cont'}</p>
           <form onSubmit={handleSubmit}>
             {!isLogin && (
               <input
                 type="text"
                 name="name"
                 placeholder="Nume complet"
+                aria-label="Nume complet"
+                autoComplete="name"
                 value={formData.name}
                 onChange={handleChange}
                 required={!isLogin}
@@ -51,6 +54,8 @@ export default function LoginSignup() {
               type="email"
               name="email"
               placeholder="Email"
+              aria-label="Email"
+              autoComplete="email"
               value={formData.email}
               onChange={handleChange}
               required
@@ -60,6 +65,8 @@ export default function LoginSignup() {
               type="password"
               name="password"
               placeholder="Parolă"
+              aria-label="Parolă"
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
               value={formData.password}
               onChange={handleChange}
               required
@@ -70,13 +77,15 @@ export default function LoginSignup() {
                 type="password"
                 name="confirmPassword"
                 placeholder="Confirmă parola"
+                aria-label="Confirmă parola"
+                autoComplete="new-password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required={!isLogin}
               />
             )}
             
-            <Button>{isLogin ? 'Conectare' : 'Înregistrare'}</Button>
+            <Button type="submit">{isLogin ? 'Conectare' : 'Înregistrare'}</Button>
           </form>
 
           <p className="toggle-text">

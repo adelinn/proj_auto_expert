@@ -16,20 +16,20 @@ function Button({
   icon: Icon,
   iconPosition = "right",
   size = "md",
-  borderRadius = "rounded-md",
+  borderRadius = "rounded-lg",
   className,
   ...props
 }) {
   // Size variants for padding and text
   const sizeClasses = {
     sm: "px-3 py-1.5 text-xs",
-    md: "px-4 py-2 text-sm",
+    md: "px-4 py-3 text-sm",
     lg: "px-6 py-3 text-base",
   };
 
-  // Base classes
+  // Base classes — accent primary button
   const baseClasses =
-    "inline-flex items-center gap-2 bg-beige-700/10 backdrop-blur-md font-semibold text-beige-100/90 shadow-lg shadow-black/10 border border-white/20 data-hover:bg-beige-200/15 focus:not-data-focus:outline-none data-focus:outline data-focus:outline-white data-focus:outline-1 data-focus:outline-offset-2 data-hover:data-active:bg-beige-500/15 transition-all duration-200";
+    "inline-flex items-center justify-center w-full gap-2 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-400 text-white font-bold shadow-lg shadow-black/25 border border-transparent hover:brightness-105 hover:shadow-[0_14px_40px_rgba(59,130,246,0.18)] focus:ring-4 focus:ring-[rgba(59,130,246,0.12)] focus:outline-none data-hover:bg-beige-200/15 data-focus:outline-offset-2 transition-all duration-200";
 
   // Combine all classes
   const buttonClasses = cn(
