@@ -29,7 +29,7 @@ function Button({
 
   // Base classes
   const baseClasses =
-    "inline-flex items-center gap-2 bg-beige-700/10 backdrop-blur-md font-semibold text-beige-100/90 shadow-lg shadow-black/10 border border-white/20 data-hover:bg-beige-200/15 data-active:outline-none data-hover:data-active:bg-beige-600/15 transition-all duration-200";
+    "inline-flex items-center gap-2 bg-beige-700/10 backdrop-blur-md font-semibold text-beige-100/90 shadow-lg shadow-black/10 border border-white/20 data-hover:bg-beige-200/15 focus:not-data-focus:outline-none data-focus:outline data-focus:outline-white data-focus:outline-1 data-focus:outline-offset-2 data-hover:data-active:bg-beige-500/15 transition-all duration-200";
 
   // Combine all classes
   const buttonClasses = cn(

@@ -3,10 +3,9 @@ import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 /**
  * Reusable Button component with configurable styling
- * @param {React.ReactNode} children - Button text content
  * @param {'check' | 'x' | 'empty'} mode - Icon position, default 'empty'
  * @param {string} size - Size variant: 'sm', 'md', 'lg' (default: 'md')
- * @param {string} borderRadius - Border radius Tailwind class (default: 'rounded-md')
+ * @param {string} borderRadius - Border radius Tailwind class (default: 'rounded-full')
  * @param {string} className - Additional Tailwind classes
  * @param {object} props - Other Headless UI Button props
  */
@@ -23,7 +22,7 @@ function Pin({
     md: "px-2 py-2 text-sm",
     lg: "px-3 py-3 text-base",
   };
-  // Size variants for padding and text
+  // Size variants for icon
   const iconSizeClasses = {
     sm: "size-4",
     md: "size-5",
