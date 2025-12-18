@@ -1,4 +1,5 @@
 import db from '../config/db.js';
+import bcrypt from 'bcrypt';
 
 const TABLE = 'useri';
 const PK = 'id_user';
@@ -31,10 +32,14 @@ export async function getUserByEmail(email) {
 }
 
 export async function createUser(data) {
+  // hash password before storing
+  if (!data.parola) throw new Error('Password (parola) is required');
+  const hashed = await bcrypt.hash(data.parola, 12);
+
   const payload = {
     email: data.email,
     username: data.username ?? null,
-    parola: data.parola, // password handling is outside scope; ensure hashing elsewhere
+    parola: hashed,
     nume: data.nume,
     telefon: data.telefon ?? null,
     enabled: typeof data.enabled !== 'undefined' ? data.enabled : 1
@@ -47,7 +52,7 @@ export async function updateUser(id, changes) {
   const payload = {};
   if (changes.email !== undefined) payload.email = changes.email;
   if (changes.username !== undefined) payload.username = changes.username;
-  if (changes.parola !== undefined) payload.parola = changes.parola;
+  if (changes.parola !== undefined) payload.parola = await bcrypt.hash(changes.parola, 12);
   if (changes.nume !== undefined) payload.nume = changes.nume;
   if (changes.telefon !== undefined) payload.telefon = changes.telefon;
   if (changes.enabled !== undefined) payload.enabled = changes.enabled;
