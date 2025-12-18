@@ -22,7 +22,7 @@ export default function ChooseCategoryModal({ open, onClose }) {
     if (!selected) return;
     localStorage.setItem("userCategory", selected);
     onClose?.();
-    navigate("/questions");
+    navigate("/home");
   }
 
   // Prevent closing the dialog via overlay/Esc by ignoring onClose events
