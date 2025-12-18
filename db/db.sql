@@ -84,9 +84,9 @@ CREATE TABLE IF NOT EXISTS `teste` (
 
 CREATE TABLE IF NOT EXISTS `useri` (
   `id_user` int unsigned NOT NULL AUTO_INCREMENT,
-  `email` varchar(45) NOT NULL,
+  `email` varchar(61) NOT NULL,
   `username` varchar(45) DEFAULT NULL,
-  `parola` varchar(45) NOT NULL,
+  `parola` varchar(61) NOT NULL,
   `nume` varchar(45) NOT NULL,
   `telefon` varchar(45) DEFAULT NULL,
   `enabled` tinyint unsigned NOT NULL DEFAULT '1',
