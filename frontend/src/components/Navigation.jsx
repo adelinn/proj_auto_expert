@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
-import {
-  AcademicCapIcon,
-} from "@heroicons/react/16/solid";
+import { AcademicCapIcon } from "@heroicons/react/16/solid";
+import AccountMenu from "./AccountMenu";
 
 function Navigation() {
 
@@ -25,10 +24,11 @@ function Navigation() {
           </span>
         </div>
 
-        <div className="absolute right-6 top-4">
-          <Link to="/privacy" className="text-sm font-medium text-white/75 hover:underline hover:text-white/95">
-            Politica de confidențialitate
-          </Link>
+        <div className="absolute top-4 right-6 flex items-center gap-3">
+          <div>
+            {/* Account menu */}
+            <AccountMenu />
+          </div>
         </div>
       </div>
     </nav>

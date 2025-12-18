@@ -110,6 +110,28 @@
   color: rgba(255,255,255,0.9);
 }
 
+.privacy-link-bottom {
+  margin-top: 0.5rem;
+}
+
+.privacy-bottom-link {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: color 120ms ease, text-decoration 120ms ease, opacity 120ms ease;
+}
+
+.privacy-bottom-link:hover {
+  text-decoration: underline;
+  color: rgba(255,255,255,0.94);
+}
+
+.input-error {
+  margin-top: 0.45rem;
+  color: rgba(240, 95, 85, 0.95);
+  font-size: 0.875rem;
+}
+
 .toggle-btn {
   margin-left: 0.5rem;
   background: transparent;

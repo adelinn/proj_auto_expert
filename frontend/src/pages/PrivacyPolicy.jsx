@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function PrivacyPolicy() {
   return (
     <main className="privacy-policy" style={{padding: '2rem', maxWidth: 880, margin: '0 auto', color: 'var(--color-beige-100)'}}>
@@ -10,7 +12,7 @@ export default function PrivacyPolicy() {
 
           <div style={{display:'flex', gap:8}}>
             <button onClick={() => window.print()} className="btn-download" style={{background: 'linear-gradient(90deg,#06b6d4,#3b82f6)', color:'#fff', border:'none', padding:'8px 12px', borderRadius:8, fontWeight:700}}>Descarcă (PDF)</button>
-            <a href="/" style={{color:'rgba(255,255,255,0.88)'}}>Închide</a>
+            <Link to="/login" style={{color:'rgba(255,255,255,0.88)'}}>Închide</Link>
           </div>
         </div>
 
