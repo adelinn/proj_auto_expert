@@ -6,6 +6,7 @@ const env = process.env.NODE_ENV || 'development';
 const config = knexfile[env] || knexfile.development || knexfile;
 
 const db = knex(config);
+import logger from '../server/logger.js';
 
 /**
  * Apply pending migrations (call from server startup if desired)
@@ -13,11 +14,11 @@ const db = knex(config);
  */
 export async function migrateLatest() {
   if (process.env.RUN_MIGRATIONS_ON_START === '1') {
-    console.log('Running DB migrations (RUN_MIGRATIONS_ON_START=1)');
+    logger.info('Running DB migrations (RUN_MIGRATIONS_ON_START=1)');
     await db.migrate.latest();
-    console.log('DB migrations finished');
+    logger.info('DB migrations finished');
   }
-}
+} 
 
 /**
  * Graceful shutdown helper to destroy the Knex connection pool

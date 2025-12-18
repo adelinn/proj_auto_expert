@@ -1,5 +1,6 @@
 import Project from '../models/Project.js';
 import { analyzeLinks } from '../services/geminiService.js';
+import logger from '../server/logger.js';
 
 export const getProjects = async (req, res) => {
   try {
@@ -21,22 +22,30 @@ export const createProject = async (req, res) => {
       return res.status(400).json({ msg: 'Please provide at least one valid link.' });
     }
 
+    // Validate links for format, protocol, domain whitelist and SSRF protections
+    const { validateLinks } = await import('../server/urlValidator.js');
+    const { valid, invalid } = await validateLinks(sanitizedLinks);
+    if (invalid.length) {
+      return res.status(400).json({ msg: 'Some links are invalid or not allowed.', details: invalid });
+    }
+
     // 1. Create basic project
     let project = new Project({
       user: req.user.id,
       name,
-      links: sanitizedLinks,
+      links: valid,
       analysis: null // Pending
     });
     
     // 2. Trigger AI Analysis
-    const analysisResult = await analyzeLinks(sanitizedLinks);
+    const analysisResult = await analyzeLinks(valid);
     project.analysis = analysisResult;
 
     await project.save();
     res.json(project);
   } catch (err) {
-    console.error('Error creating project / analyzing links', err);
+    const log = req?.log || logger;
+    log.error({ err }, 'Error creating project / analyzing links');
     res.status(500).json({ msg: 'Server Error during analysis' });
   }
 };
@@ -57,7 +66,8 @@ export const deleteProject = async (req, res) => {
     await Project.findByIdAndDelete(req.params.id);
     res.json({ msg: 'Project removed' });
   } catch (err) {
-    console.error('Error deleting project', err);
+    const log = req?.log || logger;
+    log.error({ err }, 'Error deleting project');
     res.status(500).json({ msg: 'Server Error' });
   }
 };
