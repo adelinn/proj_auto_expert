@@ -6,6 +6,8 @@ import NeonBlobsBackground from "./components/NeonBlobsBackground";
 import LoginSignup from "./pages/LoginSignup";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Questions from "./pages/Questions";
+import Quiz from "./pages/Quiz";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -14,12 +16,15 @@ function App() {
       <Navigation />
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/home" element={<Home />} />
         <Route path="/login" element={<LoginSignup initialMode="login" />} />
         <Route path="/signup" element={<LoginSignup initialMode="signup" />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/questions" element={<Questions />} />
         {/* <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} />} /> */}
+
+        {/* Protected pages */}
+        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/quiz/:id" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
       </Routes>
 
 

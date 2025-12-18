@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import Button from '../components/Button';
 import NeonBlobsBackground from '../components/NeonBlobsBackground';
 import ChooseCategoryModal from '../components/ChooseCategoryModal';
@@ -26,6 +26,15 @@ export default function LoginSignup({ initialMode = 'login' }) {
 
   const navigate = useNavigate();
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location && location.state && location.state.openCategory) {
+      // if we were redirected here to pick a category, ensure signup mode and open modal
+      setIsLogin(false);
+      setIsCategoryModalOpen(true);
+    }
+  }, [location]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
