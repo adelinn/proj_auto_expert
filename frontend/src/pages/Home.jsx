@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import quizzesData from '../data/quizzes';
 import './Home.css';
@@ -16,13 +16,8 @@ function getSavedProgress(quizId) {
 
 function Home() {
   const navigate = useNavigate();
-  const [category, setCategory] = useState(() => localStorage.getItem('userCategory'));
-  const [quizzes, setQuizzes] = useState([]);
-
-  useEffect(() => {
-    const filtered = quizzesData.filter((q) => q.category === category);
-    setQuizzes(filtered);
-  }, [category]);
+  const [category, _setCategory] = useState(() => localStorage.getItem('userCategory'));
+  const quizzes = useMemo(() => quizzesData.filter((q) => q.category === category), [category]); useState([]);
 
   function openQuiz(id) {
     navigate(`/quiz/${id}`);

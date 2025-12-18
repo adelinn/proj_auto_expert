@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
+    "test-env": "node test/validateEnv.js",
+    "test-links": "node test/validateLinks.js",
+    "test-db-allowed-domains": "node test/adminAllowedDomains.js",
     "migrate": "knex migrate:latest",
     "seed": "knex seed:run",
     "dbp": "cloud-sql-proxy.exe auto-expert-479412:europe-west4:auto-expert-db --address 127.0.0.1 --port 3306",
@@ -13,16 +16,20 @@
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.19.2",
-    "helmet": "^6.0.1",
     "express-rate-limit": "^6.8.0",
     "express-validator": "^7.0.1",
+    "helmet": "^6.0.1",
     "jsonwebtoken": "^9.0.3",
     "knex": "^3.1.0",
     "mysql2": "^3.16.0",
-    "uuid": "^13.0.0"
+    "pino": "^8.18.0",
+    "pino-http": "^8.2.0",
+    "uuid": "^13.0.0",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
