@@ -8,7 +8,7 @@
     "start": "node server.js",
     "migrate": "knex migrate:latest",
     "seed": "knex seed:run",
-    "dbp": "cloud-sql-proxy.x64.exe auto-expert-479412:europe-west4:auto-expert-db --address 127.0.0.1 --port 3306",
+    "dbp": "cloud-sql-proxy.exe auto-expert-479412:europe-west4:auto-expert-db --address 127.0.0.1 --port 3306",
     "install-cloudsql": "curl https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.20.0/cloud-sql-proxy.x64.exe -o cloud-sql-proxy.exe"
   },
   "dependencies": {
