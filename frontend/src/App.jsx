@@ -20,7 +20,7 @@ function App() {
         <Route path="/signup" element={<LoginSignup initialMode="signup" />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/questions" element={<Questions />} />
-        {/* <Route path="*" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} />} /> */}
+        <Route path="*" element={<Navigate to="/home" replace />} />
 
         {/* Protected pages */}
         <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
