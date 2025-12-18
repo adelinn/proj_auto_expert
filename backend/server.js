@@ -8,7 +8,6 @@ import authRoutes from './routes/authRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import questionsRoutes from './routes/questions.js';
 import { migrateLatest, destroyDb } from './config/db.js';
-import { validateGeminiConfig } from './server/geminiService.js';
 import logger, { httpLogger } from './server/logger.js';
 
 const app = express();
@@ -64,7 +63,6 @@ app.use((err, req, res, next) => {
 // Start server and optionally run migrations
 async function start() {
   try {
-    validateGeminiConfig();
     await migrateLatest(); // runs only if RUN_MIGRATIONS_ON_START=1 in env
 
     const PORT = process.env.PORT || 5000;

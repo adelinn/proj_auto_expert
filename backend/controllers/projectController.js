@@ -1,10 +1,8 @@
-import Project from '../models/Project.js';
-import { analyzeLinks } from '../services/geminiService.js';
 import logger from '../server/logger.js';
 
 export const getProjects = async (req, res) => {
   try {
-    const projects = await Project.find({ user: req.user.id }).sort({ createdAt: -1 });
+    const projects = {};
     res.json(projects);
   } catch (err) {
     res.status(500).send('Server Error');
@@ -30,19 +28,19 @@ export const createProject = async (req, res) => {
     }
 
     // 1. Create basic project
-    let project = new Project({
-      user: req.user.id,
-      name,
-      links: valid,
-      analysis: null // Pending
-    });
+    // let project = new Project({
+    //   user: req.user.id,
+    //   name,
+    //   links: valid,
+    //   analysis: null // Pending
+    // });
     
-    // 2. Trigger AI Analysis
-    const analysisResult = await analyzeLinks(valid);
-    project.analysis = analysisResult;
+    // // 2. Trigger AI Analysis
+    // const analysisResult = {};
+    // project.analysis = analysisResult;
 
-    await project.save();
-    res.json(project);
+    // await project.save();
+    res.json({});
   } catch (err) {
     const log = req?.log || logger;
     log.error({ err }, 'Error creating project / analyzing links');

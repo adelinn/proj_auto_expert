@@ -1,13 +1,13 @@
 import express from 'express';
 import { body, param, validationResult } from 'express-validator';
-import * as svc from '../services/intrebari.js';
+import * as intrebari from '../repositories/intrebari.js';
 
 const router = express.Router();
 
 // GET /api/questions
 router.get('/', async (req, res, next) => {
   try {
-    const rows = await svc.getAllIntrebari();
+    const rows = await intrebari.getAll();
     res.json(rows);
   } catch (err) {
     next(err);
@@ -22,7 +22,7 @@ router.get(
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
     try {
-      const row = await svc.getIntrebareById(req.params.id);
+      const row = await intrebari.getById(req.params.id);
       if (!row) return res.status(404).json({ error: 'Not found' });
       res.json(row);
     } catch (err) {
@@ -42,7 +42,7 @@ router.post(
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
     try {
       const { text, id_poza, tipQ_1xR } = req.body;
-      const created = await svc.createQuestion({ text, id_poza, tipQ_1xR });
+      const created = await intrebari.create({ text, id_poza, tipQ_1xR });
       res.status(201).json(created);
     } catch (err) {
       next(err);
@@ -61,7 +61,7 @@ router.put(
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
     try {
-      const updated = await svc.updateIntrebare(req.params.id, req.body);
+      const updated = await intrebari.update(req.params.id, req.body);
       res.json(updated);
     } catch (err) {
       next(err);
@@ -77,7 +77,7 @@ router.delete(
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
     try {
-      await svc.deleteIntrebare(req.params.id);
+      await intrebari.delete(req.params.id);
       res.status(204).end();
     } catch (err) {
       next(err);
