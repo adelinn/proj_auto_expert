@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   AcademicCapIcon,
 } from "@heroicons/react/16/solid";
@@ -22,6 +23,12 @@ function Navigation() {
           <span className="text-xl font-bold text-white/95 tracking-tight drop-shadow-md">
             Semni
           </span>
+        </div>
+
+        <div className="absolute right-6 top-4">
+          <Link to="/privacy" className="text-sm font-medium text-white/75 hover:underline hover:text-white/95">
+            Politica de confidențialitate
+          </Link>
         </div>
       </div>
     </nav>

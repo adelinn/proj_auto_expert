@@ -29,7 +29,7 @@ function Button({
 
   // Base classes — accent primary button
   const baseClasses =
-    "inline-flex items-center justify-center w-full gap-2 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-400 text-white font-bold shadow-lg shadow-black/25 border border-transparent hover:brightness-105 hover:shadow-[0_14px_40px_rgba(59,130,246,0.18)] focus:ring-4 focus:ring-[rgba(59,130,246,0.12)] focus:outline-none data-hover:bg-beige-200/15 data-focus:outline-offset-2 transition-all duration-200";
+    "inline-flex items-center justify-center w-full gap-2 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-400 text-white font-bold shadow-lg shadow-black/25 border border-transparent hover:brightness-105 hover:shadow-[0_14px_40px_rgba(59,130,246,0.18)] focus:ring-4 focus:ring-[rgba(59,130,246,0.12)] focus:outline-none data-hover:bg-beige-200/15 data-focus:outline-offset-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed";
 
   // Combine all classes
   const buttonClasses = cn(

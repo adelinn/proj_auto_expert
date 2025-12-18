@@ -134,3 +134,13 @@
   box-shadow: 0 6px 18px rgba(59,130,246,0.08), 0 0 0 3px rgba(59,130,246,0.06);
   border-radius: 6px;
 }
+
+.policy-label {
+  color: rgba(255,255,255,0.9);
+}
+
+.policy-label a {
+  color: rgba(59,130,246,0.95);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

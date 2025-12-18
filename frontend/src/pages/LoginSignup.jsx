@@ -10,15 +10,17 @@ export default function LoginSignup() {
     email: '',
     password: '',
     name: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    acceptedPolicy: false
   });
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    const newValue = type === 'checkbox' ? checked : value;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: newValue
     }));
   };
 
@@ -73,19 +75,35 @@ export default function LoginSignup() {
             />
             
             {!isLogin && (
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirmă parola"
-                aria-label="Confirmă parola"
-                autoComplete="new-password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required={!isLogin}
-              />
+              <>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Confirmă parola"
+                  aria-label="Confirmă parola"
+                  autoComplete="new-password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required={!isLogin}
+                />
+
+                <label className="policy-label" style={{display:'flex', alignItems:'center', gap:10, fontSize:14}}>
+                  <input
+                    type="checkbox"
+                    name="acceptedPolicy"
+                    checked={formData.acceptedPolicy}
+                    onChange={handleChange}
+                    required={!isLogin}
+                    style={{width:18, height:18}}
+                  />
+                  <span>
+                    Sunt de acord cu <a href="/privacy" style={{color:'rgba(59,130,246,0.95)', textDecoration:'underline'}}>Politica de confidențialitate</a>
+                  </span>
+                </label>
+              </>
             )}
             
-            <Button type="submit">{isLogin ? 'Conectare' : 'Înregistrare'}</Button>
+            <Button type="submit" disabled={!isLogin && !formData.acceptedPolicy}>{isLogin ? 'Conectare' : 'Înregistrare'}</Button>
           </form>
 
           <p className="toggle-text">
