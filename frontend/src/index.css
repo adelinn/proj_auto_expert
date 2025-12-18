@@ -68,9 +68,9 @@ body {
   min-height: 100vh;
 }
 
-@media (prefers-color-scheme: light) {
+/* @media (prefers-color-scheme: light) {
   :root {
     color: var(--color-beige-900);
     background-color: var(--color-beige-100);
   }
-}
+} */
