@@ -1,3 +1,5 @@
+import "./NeonBlobsBackground.css";
+
 function NeonBlobsBackground() {
   /* Neon lightning blobs background */
   return (

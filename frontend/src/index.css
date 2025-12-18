@@ -70,7 +70,7 @@ body {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: var(--color-beige-900);
+    background-color: var(--color-beige-100);
   }
 }
