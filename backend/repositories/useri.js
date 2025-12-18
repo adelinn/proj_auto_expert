@@ -51,24 +51,24 @@ function toPublic(row) {
   );
 }
 
-export async function getAllUsers() {
+export async function getAll() {
   const rows = await db(TABLE).select('*');
   return rows.map(toPublic);
 }
 
-export async function getUserById(id) {
+export async function getById(id) {
   const safeId = parseInput(zId, id, "Invalid user id");
   const row = await db(TABLE).where(PK, safeId).first();
   return toPublic(row);
 }
 
-export async function getUserByEmail(email) {
+export async function getByEmail(email) {
   const safeEmail = parseInput(z.string().email(), email, "Invalid email");
   const row = await db(TABLE).where('email', safeEmail).first();
   return toPublic(row);
 }
 
-export async function createUser(data) {
+export async function create(data) {
   const safe = parseInput(zUserCreate, data, "Invalid user create payload");
   // hash password before storing
   const hashed = await bcrypt.hash(safe.parola, 12);
@@ -85,7 +85,7 @@ export async function createUser(data) {
   return getUserById(insertId);
 }
 
-export async function updateUser(id, changes) {
+export async function update(id, changes) {
   const safeId = parseInput(zId, id, "Invalid user id");
   const safe = parseInput(zUserUpdate, changes, "Invalid user update payload");
   const payload = {};
@@ -100,16 +100,26 @@ export async function updateUser(id, changes) {
   return getUserById(safeId);
 }
 
-export function deleteUser(id) {
+export function del(id) {
   const safeId = parseInput(zId, id, "Invalid user id");
   return db(TABLE).where(PK, safeId).del();
 }
 
-export default {
-  getAll: getAllUsers,
-  getById: getUserById,
-  getByEmail: getUserByEmail,
-  create: createUser,
-  update: updateUser,
-  delete: deleteUser
-};
+export async function getAllUsers(...args) {
+  return getAll(...args);
+}
+export async function getUserById(...args) {
+  return getByI(...args);
+}
+export async function getUserByEmail(...args) {
+  return getByEmail(...args);
+}
+export async function createUser(...args) {
+  return create(...args);
+}
+export async function updateUser(...args) {
+  return update(...args);
+}
+export function deleteUser() {
+  return del();
+}

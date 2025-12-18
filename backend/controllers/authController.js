@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import * as useri from '../repositories/useri.js';
 
 export const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { username, email, password } = req.body;
   try {
     let user = await useri.getByEmail(email);
     if (user) return res.status(400).json({ msg: 'User already exists' });
@@ -11,8 +11,7 @@ export const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    user = new useri.create({ nume: name, email, parola: hashedPassword });
-    await user.save();
+    user = await useri.create({ nume: username, email, parola: hashedPassword });
 
     const payload = { user: { id: user.id, name: user.nume } };
     jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '39h' }, (err, token) => {
@@ -20,7 +19,7 @@ export const register = async (req, res) => {
       res.json({ token });
     });
   } catch (err) {
-    res.status(500).send('Server error');
+    res.status(500).send('Server error'+err.message);
   }
 };
 

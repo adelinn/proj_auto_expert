@@ -82,7 +82,7 @@ export default function LoginSignup({ initialMode = 'login' }) {
     setErrors({});
 
     const apiBase =
-      (import.meta?.env?.VITE_API_BASE_URL || 'http://localhost:5000/api/auth').replace(/\/+$/, '');
+      (import.meta?.env?.VITE_API_BASE_URL || 'http://localhost:5000/api').replace(/\/+$/, '');
 
     const endpoint = isLogin ? '/auth/login' : '/auth/register';
     const url = `${apiBase}${endpoint}`;
