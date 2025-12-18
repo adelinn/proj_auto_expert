@@ -25,9 +25,11 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // CORS
-const allowedOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
+const allowedOrigins = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(',').map(s => s.trim()).filter(Boolean)
+  : ['http://localhost:5173', 'http://localhost:3000'];
 const corsOptions = {
-  origin: allowedOrigin,
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,

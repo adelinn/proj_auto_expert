@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '../components/Button';
 import NeonBlobsBackground from '../components/NeonBlobsBackground';
@@ -11,14 +11,19 @@ export default function LoginSignup({ initialMode = 'login' }) {
   useEffect(() => {
     setIsLogin(initialMode !== 'signup');
   }, [initialMode]);
-  const [formData, setFormData] = useState({
+
+  const initialFormData = useMemo(() => ({
     email: '',
     password: '',
-    name: '',
+    name: '', // used as username on signup
     confirmPassword: '',
     acceptedPolicy: false
-  });
-  const [errors, setErrors] = useState({});
+  }), []);
+
+  const [formData, setFormData] = useState(initialFormData);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
   const navigate = useNavigate();
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
@@ -33,72 +38,88 @@ export default function LoginSignup({ initialMode = 'login' }) {
 
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     // Login submit
     e.preventDefault();
+    setError('');
 
-    // Basic client-side validation for login
-    const newErrors = {};
+    if (!isLogin) {
+      if (formData.password !== formData.confirmPassword) {
+        setError('Parolele nu se potrivesc.');
+        return;
+      }
+      if (!formData.acceptedPolicy) {
+        setError('Trebuie să accepți politica de confidențialitate.');
+        return;
+      }
+    }
 
     if (!formData.email || !formData.email.includes('@')) {
-      newErrors.email = 'Introduceți o adresă de email validă.';
-    }
-
-    if (!formData.password || formData.password.length < 6) {
-      newErrors.password = 'Parola trebuie să aibă cel puțin 6 caractere.';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+      setError('Introduceți o adresă de email validă.');
       return;
     }
 
-    setErrors({});
-    // TODO: Implement Firebase auth
-    console.log('login submit');
-    const userObj = { name: formData.name || formData.email, email: formData.email };
-    localStorage.setItem('user', JSON.stringify(userObj));
-    navigate('/login');
-  };
-
-  const handleSignup = (e) => {
-    console.log('signup submit');
-    e.preventDefault();
-
-    // Validation for signup
-    const newErrors = {};
-
-    if (!formData.email || !formData.email.includes('@')) {
-      newErrors.email = 'Introduceți o adresă de email validă.';
-    }
-
     if (!formData.password || formData.password.length < 6) {
-      newErrors.password = 'Parola trebuie să aibă cel puțin 6 caractere.';
+      setError('Parola trebuie să aibă cel puțin 6 caractere.');
+      return;
     }
 
     if (!formData.name || formData.name.trim().length < 2) {
-      newErrors.name = 'Introduceți numele complet.';
-    }
-
-    if (!formData.confirmPassword || formData.confirmPassword !== formData.password) {
-      newErrors.confirmPassword = 'Confirmarea parolei nu corespunde.';
-    }
-
-    if (!formData.acceptedPolicy) {
-      newErrors.acceptedPolicy = 'Trebuie să acceptați politica de confidențialitate.';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+      setError('Introduceți numele. Trebuie sa aiva mai mult de 2 caractere.');
       return;
     }
 
-    setErrors({});
+    const apiBase =
+      (import.meta?.env?.VITE_API_BASE_URL || 'http://localhost:5000/api/auth').replace(/\/+$/, '');
 
-    // Simulate signup: persist basic user info and open category modal
-    const userObj = { name: formData.name || formData.email, email: formData.email };
-    localStorage.setItem('user', JSON.stringify(userObj));
-    setIsCategoryModalOpen(true);
+    const endpoint = isLogin ? '/auth/login' : '/auth/register';
+    const url = `${apiBase}${endpoint}`;
+
+    // User requirement: /auth/login needs email+password; /register needs username+password.
+    // Backend in this repo uses email+password; we send username too (ignored if backend doesn't need it).
+    const payload = isLogin
+      ? { email: formData.email, password: formData.password }
+      : { email: formData.email, username: formData.name, password: formData.password };
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      let data = null;
+      try {
+        data = await res.json();
+      } catch {
+        const text = await res.text().catch(() => '');
+        data = text ? { message: text } : {};
+      }
+
+      if (!res.ok) {
+        throw new Error(data?.msg || data?.message || 'Cererea a eșuat.');
+      }
+
+      const token = data?.token || data?.data?.token;
+      if (!token) {
+        throw new Error('Răspuns invalid: token lipsă.');
+      }
+
+      localStorage.setItem('authToken', token);
+      navigate('/home');
+    } catch (err) {
+      setError(err?.message || 'A apărut o eroare. Încearcă din nou.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+
+    // // Simulate signup: persist basic user info and open category modal
+    // const userObj = { name: formData.name || formData.email, email: formData.email };
+    // localStorage.setItem('user', JSON.stringify(userObj));
+    // setIsCategoryModalOpen(true);
   };
 
   return (
@@ -108,21 +129,23 @@ export default function LoginSignup({ initialMode = 'login' }) {
         <div className="form-wrapper">
           <h1>{isLogin ? 'Conectare' : 'Înregistrare'}</h1>
           <p className="subtitle">{isLogin ? 'Introdu datele pentru a continua' : 'Completează formularul pentru a crea un cont'}</p>
-          <form onSubmit={isLogin ? handleSubmit : handleSignup}>
+          {error ? (
+            <p style={{ marginTop: 12, color: 'rgba(239, 68, 68, 0.95)', fontSize: 14 }}>
+              {error}
+            </p>
+          ) : null}
+          <form onSubmit={handleSubmit}>
             {!isLogin && (
-              <>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Nume complet"
-                  aria-label="Nume complet"
-                  autoComplete="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required={!isLogin}
-                />
-                {errors.name && <div className="input-error">{errors.name}</div>}
-              </>
+              <input
+                type="text"
+                name="name"
+                placeholder="Nume de utilizator"
+                aria-label="Nume de utilizator"
+                autoComplete="username"
+                value={formData.name}
+                onChange={handleChange}
+                required={!isLogin}
+              />
             )}
             
             <input
@@ -180,7 +203,12 @@ export default function LoginSignup({ initialMode = 'login' }) {
               </>
             )}
             
-            <Button type="submit" disabled={!isLogin && !formData.acceptedPolicy}>{isLogin ? 'Conectare' : 'Înregistrare'}</Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting || (!isLogin && !formData.acceptedPolicy)}
+            >
+              {isSubmitting ? 'Se procesează...' : (isLogin ? 'Conectare' : 'Înregistrare')}
+            </Button>
           </form>
 
           <p className="toggle-text">
@@ -190,7 +218,8 @@ export default function LoginSignup({ initialMode = 'login' }) {
               onClick={() => {
                 // Navigate to the corresponding route so URL reflects mode
                 navigate(isLogin ? '/signup' : '/login');
-                setFormData({ email: '', password: '', name: '', confirmPassword: '' });
+                setError('');
+                setFormData(initialFormData);
               }}
               className="toggle-btn"
             >
