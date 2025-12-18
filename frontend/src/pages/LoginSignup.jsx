@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import Button from '../components/Button';
-import NeonBlobsBackground from '../components/NeonBlobsBackground';
 import ChooseCategoryModal from '../components/ChooseCategoryModal';
 import "./LoginSignup.css";
 
@@ -22,7 +21,7 @@ export default function LoginSignup({ initialMode = 'login' }) {
 
   const [formData, setFormData] = useState(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -50,33 +49,37 @@ export default function LoginSignup({ initialMode = 'login' }) {
   const handleSubmit = async (e) => {
     // Login submit
     e.preventDefault();
-    setError('');
+    
+    // Basic client-side validation for login
+    const newErrors = {};
 
     if (!isLogin) {
       if (formData.password !== formData.confirmPassword) {
-        setError('Parolele nu se potrivesc.');
-        return;
+        newErrors.confirmPassword = 'Parolele nu se potrivesc.';
       }
       if (!formData.acceptedPolicy) {
-        setError('Trebuie să accepți politica de confidențialitate.');
-        return;
+        newErrors.acceptedPolicy = 'Trebuie să accepți politica de confidențialitate.';
       }
     }
 
     if (!formData.email || !formData.email.includes('@')) {
-      setError('Introduceți o adresă de email validă.');
-      return;
+      newErrors.email = 'Introduceți o adresă de email validă.';
     }
 
     if (!formData.password || formData.password.length < 6) {
-      setError('Parola trebuie să aibă cel puțin 6 caractere.');
-      return;
+      newErrors.password = 'Parola trebuie să aibă cel puțin 6 caractere.';
     }
 
     if (!formData.name || formData.name.trim().length < 2) {
-      setError('Introduceți numele. Trebuie sa aiva mai mult de 2 caractere.');
+      newErrors.name = 'Introduceți numele. Trebuie sa aiva mai mult de 2 caractere.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
+
+    setErrors({});
 
     const apiBase =
       (import.meta?.env?.VITE_API_BASE_URL || 'http://localhost:5000/api/auth').replace(/\/+$/, '');
@@ -118,7 +121,8 @@ export default function LoginSignup({ initialMode = 'login' }) {
       localStorage.setItem('authToken', token);
       navigate('/home');
     } catch (err) {
-      setError(err?.message || 'A apărut o eroare. Încearcă din nou.');
+      setErrors({message: 'A apărut o eroare. Încearcă din nou.'});
+      console.error(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -129,18 +133,16 @@ export default function LoginSignup({ initialMode = 'login' }) {
     // const userObj = { name: formData.name || formData.email, email: formData.email };
     // localStorage.setItem('user', JSON.stringify(userObj));
     // setIsCategoryModalOpen(true);
-  };
 
   return (
     <div className="login-signup-container">
-      <NeonBlobsBackground />
       <div className="login-signup-content">
         <div className="form-wrapper">
           <h1>{isLogin ? 'Conectare' : 'Înregistrare'}</h1>
           <p className="subtitle">{isLogin ? 'Introdu datele pentru a continua' : 'Completează formularul pentru a crea un cont'}</p>
-          {error ? (
+          {errors.message ? (
             <p style={{ marginTop: 12, color: 'rgba(239, 68, 68, 0.95)', fontSize: 14 }}>
-              {error}
+              {errors.message}
             </p>
           ) : null}
           <form onSubmit={handleSubmit}>
@@ -227,7 +229,7 @@ export default function LoginSignup({ initialMode = 'login' }) {
               onClick={() => {
                 // Navigate to the corresponding route so URL reflects mode
                 navigate(isLogin ? '/signup' : '/login');
-                setError('');
+                setErrors({});
                 setFormData(initialFormData);
               }}
               className="toggle-btn"
@@ -236,9 +238,11 @@ export default function LoginSignup({ initialMode = 'login' }) {
             </button>
           </p>
 
-          <p className="privacy-link-bottom">
-            <Link to="/privacy-policy" className="privacy-bottom-link">Politica de confidențialitate</Link>
-          </p>
+          {isLogin && (
+            <p className="privacy-link-bottom">
+              <Link to="/privacy-policy" className="privacy-bottom-link">Politica de confidențialitate</Link>
+            </p>
+          )}
         </div>
       </div>
 
