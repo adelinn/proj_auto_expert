@@ -5,6 +5,7 @@ import Products from "./pages/Products";
 import About from "./pages/About";
 import "./App.css";
 import NeonBlobsBackground from "./components/NeonBlobsBackground";
+import LoginSignup from "./pages/LoginSignup";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="/about" element={<About />} />
+        <Route path="/login" element={<LoginSignup />} />
       </Routes>
     </Router>
   );
