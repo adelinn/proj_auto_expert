@@ -7,6 +7,7 @@ import "./App.css";
 import NeonBlobsBackground from "./components/NeonBlobsBackground";
 import LoginSignup from "./pages/LoginSignup";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Questions from "./pages/Questions";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/login" element={<LoginSignup initialMode="login" />} />
         <Route path="/signup" element={<LoginSignup initialMode="signup" />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/questions" element={<Questions />} />
       </Routes>
 
 

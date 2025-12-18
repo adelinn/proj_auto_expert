@@ -126,6 +126,12 @@
   color: rgba(255,255,255,0.94);
 }
 
+.input-error {
+  margin-top: 0.45rem;
+  color: rgba(240, 95, 85, 0.95);
+  font-size: 0.875rem;
+}
+
 .toggle-btn {
   margin-left: 0.5rem;
   background: transparent;
