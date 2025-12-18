@@ -39,7 +39,7 @@ export default function Quiz() {
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h1>{quiz.title}</h1>
+      <h1>Chestionar (în lucru)</h1>
       <p>Acest chestionar nu este gata încă — pagină placeholder.</p>
       <div style={{ marginTop: 16 }}>
         <button onClick={simulateProgress} style={{ marginRight: 8 }}>
