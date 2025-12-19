@@ -73,8 +73,6 @@ export function trackPageView(path, title = null) {
     logEvent(analytics, 'page_view', {
       page_path: path,
       ...(title && { page_title: title })
-    }).catch(err => {
-      console.error('Error tracking page view:', err);
     });
   } catch (err) {
     console.error('Error tracking page view:', err);
@@ -93,9 +91,7 @@ export function trackEvent(eventName, eventParams = {}) {
     const analytics = getAnalyticsInstance();
     if (!analytics) return;
 
-    logEvent(analytics, eventName, eventParams).catch(err => {
-      console.error('Error tracking event:', err);
-    });
+    logEvent(analytics, eventName, eventParams);
   } catch (err) {
     console.error('Error tracking event:', err);
   }
