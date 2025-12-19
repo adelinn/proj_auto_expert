@@ -36,9 +36,3 @@ resource "google_firebase_hosting_release" "main" {
   version_name = google_firebase_hosting_version.main.name
   message      = "Terraform managed release"
 }
-
-resource "google_project_iam_member" "github_deployer_hosting_admin" {
-  project = data.google_project.main.project_id
-  role    = "roles/firebasehosting.admin"
-  member  = google_service_account.github_deployer.member
-}

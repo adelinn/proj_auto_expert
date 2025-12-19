@@ -1,4 +1,4 @@
-FROM node:24-alpine AS build
+FROM node:24-slim AS build
 
 RUN apk add --update python3 py3-pip curl bash
 RUN curl -fsSL https://bun.sh/install | bash
