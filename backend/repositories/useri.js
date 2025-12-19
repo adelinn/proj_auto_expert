@@ -10,6 +10,7 @@ const zUserPublic = z.object({
   id: zId,
   email: z.email(),
   username: z.string().nullable(),
+  parola: z.string().min(1),
   nume: z.string().nullable(),
   telefon: z.string().nullable(),
   enabled: zFlag01
@@ -43,6 +44,7 @@ function toPublic(row) {
       id: row[PK],
       email: row.email,
       username: row.username ?? null,
+      parola: row.parola ?? null,
       nume: row.nume ?? null,
       telefon: row.telefon ?? null,
       enabled: row.enabled
@@ -63,7 +65,7 @@ export async function getById(id) {
 }
 
 export async function getByEmail(email) {
-  const safeEmail = parseInput(z.string().email(), email, "Invalid email");
+  const safeEmail = parseInput(z.email(), email, "Invalid email");
   const row = await db(TABLE).where('email', safeEmail).first();
   return toPublic(row);
 }
@@ -71,7 +73,8 @@ export async function getByEmail(email) {
 export async function create(data) {
   const safe = parseInput(zUserCreate, data, "Invalid user create payload");
   // hash password before storing
-  const hashed = await bcrypt.hash(safe.parola, 12);
+  const salt = await bcrypt.genSalt(12);
+  const hashed = await bcrypt.hash(safe.parola, salt);
 
   const payload = {
     email: safe.email,
@@ -82,7 +85,7 @@ export async function create(data) {
     enabled: safe.enabled
   };
   const [insertId] = await db(TABLE).insert(payload);
-  return getUserById(insertId);
+  return getById(insertId);
 }
 
 export async function update(id, changes) {
@@ -91,13 +94,16 @@ export async function update(id, changes) {
   const payload = {};
   if (safe.email !== undefined) payload.email = safe.email;
   if (safe.username !== undefined) payload.username = safe.username;
-  if (safe.parola !== undefined) payload.parola = await bcrypt.hash(safe.parola, 12);
+  if (safe.parola !== undefined) {
+    const salt = await bcrypt.genSalt(12);
+    payload.parola = await bcrypt.hash(safe.parola, salt);
+  }
   if (safe.nume !== undefined) payload.nume = safe.nume;
   if (safe.telefon !== undefined) payload.telefon = safe.telefon;
   if (safe.enabled !== undefined) payload.enabled = safe.enabled;
 
   await db(TABLE).where(PK, safeId).update(payload);
-  return getUserById(safeId);
+  return getById(safeId);
 }
 
 export function del(id) {
@@ -109,7 +115,7 @@ export async function getAllUsers(...args) {
   return getAll(...args);
 }
 export async function getUserById(...args) {
-  return getByI(...args);
+  return getById(...args);
 }
 export async function getUserByEmail(...args) {
   return getByEmail(...args);
