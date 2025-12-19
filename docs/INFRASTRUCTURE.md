@@ -1,0 +1,311 @@
+# Infrastructure Documentation
+
+## Overview
+
+Infrastructure is managed with Terraform and deploys resources to Google Cloud Platform (GCP). The infrastructure includes Firebase Hosting, Cloud Run, Cloud SQL, DNS, and GitHub Actions integration.
+
+## Tech Stack
+
+- **Terraform** - Infrastructure as Code
+- **Google Cloud Platform** - Cloud provider
+- **Firebase Hosting** - Frontend hosting
+- **Cloud Run** - Backend container hosting
+- **Cloud SQL** - MySQL database
+- **Artifact Registry** - Container image storage
+- **Secret Manager** - Secrets storage
+
+## Project Structure
+
+```
+infra/
+├── config.tf                    # Terraform configuration and providers
+├── 01_file_name.tf              # Generic file name structure for TF files
+└── 02_ ... .tf
+```
+
+## Prerequisites
+
+- **Terraform** >= 1.4.6
+- **Google Cloud SDK** (gcloud)
+- **GCP Project** with billing enabled
+- **GitHub CLI** (for GitHub provider)
+
+## Configuration
+
+### GCP Project Setup
+
+The project is configured in `config.tf`:
+
+```hcl
+locals {
+  props = {
+    gcp = {
+      location   = "europe-west4"
+      project_id = "auto-expert-479412"
+    }
+  }
+}
+```
+
+### Authentication
+
+Authenticate with GCP:
+
+```bash
+gcloud auth login
+gcloud config set project auto-expert-479412
+```
+
+For Terraform:
+
+```bash
+gcloud auth application-default login
+```
+
+## Infrastructure Components
+
+### 1. Project Configuration (`01_project_config.tf`)
+
+- Enables required GCP APIs
+- Sets up Firebase project
+- Creates GitHub Actions variables
+
+**APIs Enabled:**
+- `firebase.googleapis.com`
+- `firebasehosting.googleapis.com`
+- `run.googleapis.com`
+- `sqladmin.googleapis.com`
+- `secretmanager.googleapis.com`
+- `artifactregistry.googleapis.com`
+- `dns.googleapis.com`
+
+### 2. DNS (`02_dns.tf`)
+
+- Manages DNS zone: `autoexpert.qzz.io.`
+- App domain: `app.autoexpert.qzz.io`
+- DNS records for Firebase Hosting
+
+### 3. GitHub Deployer (`03_github_deployer.tf`)
+
+- Creates service account for GitHub Actions
+- Sets up Workload Identity Federation
+- Grants necessary permissions:
+  - Cloud Run Admin
+  - Artifact Registry Writer
+  - Firebase Hosting Admin
+  - Secret Manager Secret Accessor
+
+### 4. Firebase Hosting (`04_firebase_hosting.tf`)
+
+- Creates Firebase Hosting site: `auto-expert-quiz`
+- Sets up custom domain
+- Configures rewrites to Cloud Run backend
+
+**Site ID**: `auto-expert-quiz`
+
+### 5. Database (`05_database.tf`)
+
+- Cloud SQL MySQL 8.0 instance
+- Instance name: `auto-expert-db`
+- Database: `auto_expert`
+- User: `db_admin`
+- Password stored in Secret Manager
+- Tier: `db-f1-micro`
+- Edition: `ENTERPRISE`
+
+**Connection Name**: `auto-expert-479412:europe-west4:auto-expert-db`
+
+### 6. Backend (`06_backend.tf`)
+
+- Cloud Run service: `backend-prod`
+- Region: `europe-west4`
+- Scaling: 0-5 instances
+- Timeout: 600s
+- Memory: 1Gi
+- CPU: 1
+- Public access enabled
+- Cloud SQL connection via Unix socket
+
+**Service Account**: `sa-backend-prod@auto-expert-479412.iam.gserviceaccount.com`
+
+**Secrets:**
+
+- `db-admin-password-prod` - Database password
+- `jwt-secret-prod` - JWT signing secret
+
+### 7. Artifact Registry (`07_artifact_registry.tf`)
+
+- Container registry for Docker images
+- Repository: `default`
+- Format: Docker
+
+## Deployment
+
+### Initial Setup
+
+1. **Initialize Terraform:**
+
+   ```bash
+   cd infra
+   terraform init
+   ```
+
+2. **Review planned changes:**
+
+   ```bash
+   terraform plan
+   ```
+
+3. **Apply infrastructure:**
+
+   ```bash
+   terraform apply
+   ```
+
+### Updating Infrastructure
+
+1. **Make changes to `.tf` files**
+
+2. **Plan changes:**
+
+   ```bash
+   terraform plan
+   ```
+
+3. **Apply changes:**
+
+   ```bash
+   terraform apply
+   ```
+
+### Destroying Infrastructure
+
+⚠️ **Warning**: This will delete all resources!
+
+```bash
+terraform destroy
+```
+
+## Key Resources
+
+### Cloud Run Service
+
+- **Name**: `backend-prod`
+- **URL**: `https://backend-prod-<hash>-ew.a.run.app`
+- **Region**: `europe-west4`
+- **Public**: Yes (allUsers can invoke)
+
+### Cloud SQL Instance
+
+- **Name**: `auto-expert-db`
+- **Type**: MySQL 8.0
+- **Tier**: `db-f1-micro`
+- **Region**: `europe-west4`
+- **Connection**: Via Cloud SQL Proxy or Unix socket
+
+### Firebase Hosting
+
+- **Site ID**: `auto-expert-quiz`
+- **Domain**: `app.autoexpert.qzz.io`
+- **Backend Rewrite**: `/api` → Cloud Run service
+
+## Environment Variables
+
+Terraform creates GitHub Actions variables automatically:
+
+- `GCP_PROJECT_ID` - GCP project ID
+- `GCP_REGION` - GCP region
+- `FIREBASE_HOSTING_SITE_ID` - Firebase site ID
+- `GCP_CLOUDRUN_SA_EMAIL` - Cloud Run service account
+- `WIF_PROVIDER` - Workload Identity Provider
+- `SA_EMAIL` - GitHub Actions service account
+- `GCP_AR_BASEURL` - Artifact Registry base URL
+
+## Secrets Management
+
+Secrets are stored in Google Secret Manager:
+
+- **Database Password**: `db-admin-password-prod`
+- **JWT Secret**: `jwt-secret-prod`
+
+Secrets are automatically generated by Terraform and injected into Cloud Run as environment variables.
+
+## Networking
+
+### Cloud SQL Connection
+
+Cloud Run connects to Cloud SQL via Unix socket:
+
+```
+/cloudsql/auto-expert-479412:europe-west4:auto-expert-db
+```
+
+This is configured as a volume mount in the Cloud Run service.
+
+### CORS Configuration
+
+Backend CORS is configured to allow:
+- `http://localhost:5173` (Vite dev server)
+- `http://localhost:3000` (Alternative dev server)
+- Production domain (via `CLIENT_ORIGIN` env var)
+
+## Monitoring and Logging
+
+- **Cloud Run Logs**: Available in GCP Console → Cloud Run → Logs
+- **Firebase Hosting Logs**: Available in Firebase Console
+- **Application Logs**: Structured JSON logs via Pino
+
+## Cost Optimization
+
+- **Cloud Run**: Scales to zero when not in use
+- **Cloud SQL**: `db-f1-micro` tier (lowest cost)
+- **Firebase Hosting**: Free tier available
+
+## Troubleshooting
+
+### Terraform Errors
+
+1. **Authentication issues:**
+   ```bash
+   gcloud auth application-default login
+   ```
+
+2. **Provider errors:**
+   ```bash
+   terraform init -upgrade
+   ```
+
+3. **State lock:**
+   ```bash
+   terraform force-unlock <lock-id>
+   ```
+
+### Resource Creation Failures
+
+1. Check GCP quotas
+2. Verify billing is enabled
+3. Check required APIs are enabled
+4. Review Terraform error messages
+
+### Cloud Run Deployment Issues
+
+1. Verify container image exists in Artifact Registry
+2. Check service account permissions
+3. Verify Cloud SQL connection configuration
+4. Review Cloud Run logs
+
+### Database Connection Issues
+
+1. Verify Cloud SQL instance is running
+2. Check service account has `cloudsql.client` role
+3. Verify connection name is correct
+4. Check firewall rules (if using IP connection)
+
+## Best Practices
+
+1. **State Management**: Use remote state (GCS bucket) for team collaboration
+2. **Secrets**: Never commit secrets to version control
+3. **Versioning**: Tag Terraform versions for production
+4. **Backups**: Regular database backups via Cloud SQL
+5. **Monitoring**: Set up alerts for resource usage
+6. **Cost Monitoring**: Review GCP billing regularly
