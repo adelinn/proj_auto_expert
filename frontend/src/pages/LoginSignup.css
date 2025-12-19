@@ -1,5 +1,4 @@
 .login-signup-container {
-  min-height: 100vh;
   position: relative;
   display: grid;
   place-items: center; /* centers content vertically and horizontally */

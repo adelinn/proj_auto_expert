@@ -1,0 +1,148 @@
+/* Global theme variables and reusable classes */
+:root {
+  --font-sans: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-size-lg: 1.85rem; /* page / form title */
+  --font-size-md: 1.5rem; /* page title */
+  --font-size-sm: 0.97rem; /* subtitle */
+
+  --color-accent-1: #06b6d4; /* cyan */
+  --color-accent-2: #0ea5b7; /* teal */
+  --color-muted: rgba(255,255,255,0.72);
+  --color-muted-2: rgba(255,255,255,0.6);
+  --color-bg-card: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(8, 10, 14, 0.48));
+  --glass-border: rgba(255,255,255,0.04);
+  --glass-overlay: rgba(255,255,255,0.02);
+
+  --card-radius: 12px;
+  --card-shadow: 0 20px 60px rgba(2,6,23,0.65);
+
+  --badge-bg: rgba(255,255,255,0.06);
+  --badge-color: #e6f7f8;
+  --badge-accent: #9ee7f2;
+}
+
+/* Base font + utilities */
+html, body {
+  font-family: var(--font-sans);
+}
+
+/* Page titles & subtitles */
+.page-title {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-muted);
+  letter-spacing: -0.01em;
+}
+
+.page-subtitle {
+  margin-top: 0.35rem;
+  margin-bottom: 1rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-muted-2);
+  font-weight: 400;
+}
+
+/* Reusable glass card */
+.glass-card {
+  background: var(--color-bg-card);
+  padding: 1rem;
+  border-radius: var(--card-radius);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--card-shadow);
+  color: inherit;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 80px rgba(2,6,23,0.72);
+}
+
+/* Button styles */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(90deg, #3b82f6 0%, #06b6d4 60%, #14b8a6 100%);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.5rem 0.9rem;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(2,6,23,0.32);
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary.small {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+.btn-link {
+  background: transparent;
+  border: none;
+  color: var(--color-accent-1);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Standard badge */
+.badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--badge-bg);
+  color: var(--badge-color);
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 0.77rem;
+  line-height: 1;
+  min-width: 58px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+}
+
+.badge .badge-icon {
+  color: var(--badge-accent);
+}
+
+.badge .badge-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.badge .badge-count {
+  font-size: 0.75rem;
+  opacity: 0.95;
+}
+
+.badge .badge-percent {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #bff3f6;
+}
+
+/* Glass-card small variant for compact card content */
+.glass-card.compact {
+  padding: 0.9rem;
+}
+
+/* small helpers for card content */
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.85rem 0 0.5rem 0;
+}
+
+.card-score {
+  font-size: 0.95rem;
+  color: var(--color-muted-2);
+}

@@ -7,6 +7,15 @@ on:
     paths:
       - "frontend/**"
       - "!frontend/README.md"
+  workflow_run:
+    workflows:
+      - "Deploy backend"
+    types:
+      - completed
+
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
@@ -22,9 +31,9 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22.x"
           cache-dependency-path: "frontend/package-lock.json"
@@ -32,10 +41,14 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build --if-present
+        env:
+          VITE_API_BASE_URL: /api
+          VITE_GA_MEASUREMENT_ID: ${{ vars.FIREBASE_MEASUREMENT_ID }}
+          VITE_FIREBASE_CONFIG: ${{ vars.FIREBASE_CONFIG }}
       - run: npm run test --if-present
 
       - id: "auth"
-        uses: "google-github-actions/auth@v1"
+        uses: "google-github-actions/auth@v3"
         with:
           workload_identity_provider: ${{ vars.WIF_PROVIDER }}
           service_account: ${{ vars.SA_EMAIL }}

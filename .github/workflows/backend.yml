@@ -1,0 +1,60 @@
+name: "Deploy backend"
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "backend/**"
+      - "!backend/README.md"
+      - "!backend/.env.example"
+      - "!backend/.gitignore"
+
+jobs:
+  build-and-deploy:
+    name: "Build and deploy backend"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./backend
+
+    strategy:
+      fail-fast: false
+
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      GCP_IMAGE_TAG: ${{ vars.GCP_AR_BASEURL }}/default:${{ github.sha }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - id: "auth"
+        uses: "google-github-actions/auth@v3"
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.SA_EMAIL }}
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Login to the artifact registry
+        shell: bash
+        run: |-
+          gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev
+
+      - name: Build and push container image to registry
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ${{ env.GCP_IMAGE_TAG }}
+          context: ./backend
+
+      - name: Deploy image to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          service: backend-prod
+          image: ${{ env.GCP_IMAGE_TAG }}
+          region: ${{ vars.GCP_REGION }}
+          flags: --service-account=${{ vars.GCP_CLOUDRUN_SA_EMAIL }}

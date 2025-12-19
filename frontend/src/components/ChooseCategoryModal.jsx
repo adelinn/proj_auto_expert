@@ -1,5 +1,5 @@
 import { Dialog } from "@headlessui/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, startTransition } from "react";
 import { useNavigate } from "react-router-dom";
 
 const CATEGORIES = [
@@ -13,14 +13,26 @@ const CATEGORIES = [
 export default function ChooseCategoryModal({ open, onClose }) {
   const [selected, setSelected] = useState(null);
   const navigate = useNavigate();
+  const prevOpenRef = useRef(open);
 
+  // Reset selection when modal opens (transitions from closed to open)
+  // Using startTransition to schedule the update and avoid synchronous setState
   useEffect(() => {
-    if (!open) setSelected(null);
+    const wasOpen = prevOpenRef.current;
+    prevOpenRef.current = open;
+    
+    // Only reset when modal opens (false -> true transition)
+    if (!wasOpen && open) {
+      startTransition(() => {
+        setSelected(null);
+      });
+    }
   }, [open]);
 
   function handleContinue() {
     if (!selected) return;
     localStorage.setItem("userCategory", selected);
+    setSelected(null); // Reset state before closing
     onClose?.();
     navigate("/home");
   }

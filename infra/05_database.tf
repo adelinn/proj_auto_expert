@@ -17,6 +17,10 @@ resource "google_sql_database_instance" "main" {
   depends_on = [google_project_service.main["sqladmin.googleapis.com"]]
 }
 
+locals {
+  db_pass_version = 1
+}
+
 ephemeral "random_password" "db_admin" {
   length  = 32
   special = false
@@ -26,7 +30,7 @@ resource "google_sql_user" "db_admin" {
   instance            = google_sql_database_instance.main.id
   name                = "db_admin"
   password_wo         = ephemeral.random_password.db_admin.result
-  password_wo_version = 1
+  password_wo_version = local.db_pass_version
 }
 
 resource "google_secret_manager_secret" "db_admin_password" {
@@ -41,5 +45,5 @@ resource "google_secret_manager_secret" "db_admin_password" {
 resource "google_secret_manager_secret_version" "db_admin_password" {
   secret                 = google_secret_manager_secret.db_admin_password.id
   secret_data_wo         = ephemeral.random_password.db_admin.result
-  secret_data_wo_version = 1
+  secret_data_wo_version = local.db_pass_version
 }

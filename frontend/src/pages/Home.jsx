@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import quizzesData from '../data/quizzes';
 import './Home.css';
@@ -16,33 +16,38 @@ function getSavedProgress(quizId) {
 
 function Home() {
   const navigate = useNavigate();
-  const [category, setCategory] = useState(() => localStorage.getItem('userCategory'));
-  const [quizzes, setQuizzes] = useState([]);
-
-  useEffect(() => {
-    const filtered = quizzesData.filter((q) => q.category === category);
-    setQuizzes(filtered);
-  }, [category]);
+  const [category, _setCategory] = useState(() => localStorage.getItem('userCategory'));
+  const quizzes = useMemo(() => quizzesData.filter((q) => q.category === category), [category]); useState([]);
 
   function openQuiz(id) {
     navigate(`/quiz/${id}`);
   }
 
+  function startNewAttempt() {
+    // choose first available quiz in current category
+    const available = quizzes || [];
+    if (!available || available.length === 0) {
+      alert('Nu există chestionare în această categorie pentru a începe.');
+      return;
+    }
+
+    const quiz = available[0];
+    const key = `progress_${quiz.id}`;
+    const initial = { completed: 0, correct: 0, wrong: 0, startedAt: Date.now() };
+    // overwrite existing progress to start a new attempt
+    localStorage.setItem(key, JSON.stringify(initial));
+
+    navigate(`/quiz/${quiz.id}`);
+  }
+
   return (
     <div className="home-page">
       <header className="home-header">
-        <h1>Chestionare</h1>
-        <p className="sub">Selectează un test pentru a începe sau continua</p>
+        <h1 className="page-title">Chestionare</h1>
+        <p className="page-subtitle">Selectează un test pentru a începe sau continua</p>
       </header>
 
       <div className="grid">
-        {/* Special new quiz card first */}
-        <div className="card new-card" onClick={() => openQuiz('new')} role="button" tabIndex={0}>
-          <div className="new-icon" aria-hidden>➕</div>
-          <h3 className="title">Chestionar nou</h3>
-          <div className="meta">Creează un chestionar nou</div>
-          <div className="cta">Adaugă</div>
-        </div>
 
         {quizzes.map((q, idx) => {
           const saved = getSavedProgress(q.id);
@@ -53,7 +58,7 @@ function Home() {
           const ctaLabel = completed > 0 ? 'Continuă' : 'Începe';
 
           return (
-            <div key={q.id} className="card" onClick={() => openQuiz(q.id)} role="button" tabIndex={0}>
+            <div key={q.id} className="card glass-card compact" onClick={() => openQuiz(q.id)} role="button" tabIndex={0}>
               <div
                 className="badge"
                 role="status"
@@ -69,12 +74,20 @@ function Home() {
                 </div>
               </div>
 
-              <h3 className="title">Chestionar {idx + 1}</h3>
-              <div className="score">✅ {correct} &nbsp; ❌ {wrong}</div>
-              <div className="cta">{ctaLabel}</div>
+              <h3 className="card-title">Chestionar {idx + 1}</h3>
+              <div className="card-score">✅ {correct} &nbsp; ❌ {wrong}</div>
+              <div className="cta"><div className="btn-primary small">{ctaLabel}</div></div>
             </div>
           );
         })}
+
+        {/* Special new quiz card last */}
+        <div className="card glass-card new-card" onClick={startNewAttempt} role="button" tabIndex={0}>
+          <div className="new-icon" aria-hidden>➕</div>
+          <h3 className="card-title">Chestionar nou</h3>
+          <div className="meta">Începe un test nou din această categorie</div>
+          <div className="cta"><div className="btn-primary small">Începe</div></div>
+        </div>
 
         {quizzes.length === 0 && (
           <div className="empty">Nu există chestionare pentru categoria selectată.</div>

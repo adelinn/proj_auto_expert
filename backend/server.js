@@ -6,7 +6,6 @@ import authRoutes from './routes/authRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import questionsRoutes from './routes/questions.js';
 import { migrateLatest, destroyDb } from './config/db.js';
-import { validateGeminiConfig } from './server/geminiService.js';
 import logger, { httpLogger } from './server/logger.js';
 import { generalLimiter, authLimiter } from './middleware/rateLimiters.js';
 
@@ -16,14 +15,17 @@ const app = express();
 app.use(helmet());
 app.use(express.json({ limit: '10kb' })); // limit JSON body size
 app.use(express.urlencoded({ extended: true, limit: '10kb' })); // guard urlencoded too
+app.set('trust proxy', 1); // Configure for Cloud Run
 
 // Basic rate limiting (global) and stricter for auth endpoints
 app.use(generalLimiter);
 
 // CORS
-const allowedOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
+const allowedOrigins = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(',').map(s => s.trim()).filter(Boolean)
+  : ['http://localhost:5173', 'http://localhost:3000'];
 const corsOptions = {
-  origin: allowedOrigin,
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -56,7 +58,6 @@ app.use((err, req, res, next) => {
 // Start server and optionally run migrations
 async function start() {
   try {
-    validateGeminiConfig();
     await migrateLatest(); // runs only if RUN_MIGRATIONS_ON_START=1 in env
 
     const PORT = process.env.PORT || 5000;
@@ -74,7 +75,7 @@ async function start() {
     process.on('SIGINT', shutdown);
     process.on('SIGTERM', shutdown);
   } catch (err) {
-    console.error('Failed to start server', err);
+    logger.error({ err }, 'Failed to start server');
     process.exit(1);
   }
 }

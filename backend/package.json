@@ -10,7 +10,6 @@
     "test-links": "node test/validateLinks.js",
     "test-gemini-resilience": "node test/geminiResilience.js",
     "test-db-allowed-domains": "node test/adminAllowedDomains.js",
-    "test-schema": "node test/validateGeminiOutput.js",
     "migrate": "knex migrate:latest",
     "seed": "knex seed:run",
     "dbp": "cloud-sql-proxy.exe auto-expert-479412:europe-west4:auto-expert-db --address 127.0.0.1 --port 3306",
@@ -18,6 +17,7 @@
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.19.2",

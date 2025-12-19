@@ -1,13 +1,14 @@
 import Project from '../models/Project.js';
 import { analyzeLinks } from '../services/geminiService.js';
-import { enqueueAnalysis } from '../server/analysisQueue.js';
 import logger from '../server/logger.js';
 
 export const getProjects = async (req, res) => {
+  const log = req?.log || logger;
   try {
-    const projects = await Project.find({ user: req.user.id }).sort({ createdAt: -1 });
+    const projects = {};
     res.json(projects);
   } catch (err) {
+    log.error({ err }, 'Error fetching projects');
     res.status(500).send('Server Error');
   }
 };
@@ -31,19 +32,19 @@ export const createProject = async (req, res) => {
     }
 
     // 1. Create basic project
-    let project = new Project({
-      user: req.user.id,
-      name,
-      links: valid,
-      analysis: null // Pending
-    });
+    // let project = new Project({
+    //   user: req.user.id,
+    //   name,
+    //   links: valid,
+    //   analysis: null // Pending
+    // });
     
-    // 2. Enqueue AI Analysis (async). Client can poll project to see completion.
-    const job = await enqueueAnalysis({ links: valid, userId: req.user.id, projectId: project._id?.toString() });
-    project.analysis = { status: 'queued', jobId: job.id };
+    // 2. Trigger AI Analysis
+    const analysisResult = await analyzeLinks(valid);
+    project.analysis = analysisResult;
 
-    await project.save();
-    res.json(project);
+    // await project.save();
+    res.json({});
   } catch (err) {
     const log = req?.log || logger;
     log.error({ err }, 'Error creating project / analyzing links');

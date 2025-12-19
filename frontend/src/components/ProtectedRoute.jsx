@@ -1,21 +1,28 @@
 import { Navigate } from "react-router-dom";
+import { useAuth } from '../hooks/useAuth';
+import Spinner from './Spinner';
 
 export default function ProtectedRoute({ children }) {
-  try {
-    const raw = localStorage.getItem("user");
-    const user = raw ? JSON.parse(raw) : null;
+  const { isLoading, isAuthenticated } = useAuth();
 
-    if (!user) {
-      return <Navigate to="/login" replace />;
-    }
+  // Wait for auth initialization to complete
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
-    const category = localStorage.getItem("userCategory");
-    if (!category) {
-      return <Navigate to="/signup" replace state={{ openCategory: true }} />;
-    }
-
-    return children;
-  } catch (err) {
+  // After loading, check authentication
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
+
+  const category = localStorage.getItem("userCategory");
+  if (!category) {
+    return <Navigate to="/signup" replace state={{ openCategory: true }} />;
+  }
+
+  return children;
 }

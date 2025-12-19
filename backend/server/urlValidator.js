@@ -1,5 +1,6 @@
 import { lookup } from 'dns/promises';
 import net from 'net';
+import logger from './logger.js';
 
 function isIPv4Private(ip) {
   // Convert IPv4 to numeric
@@ -58,6 +59,7 @@ export async function isHostnamePrivate(hostname) {
     return false;
   } catch (err) {
     // If DNS resolution fails, be conservative and treat as invalid/private
+    logger.warn({ err, hostname }, 'DNS resolution failed during hostname validation');
     return true;
   }
 }
@@ -76,6 +78,7 @@ export async function validateLinks(links, options = {}) {
       allowedDomains = rows.map(r => r.domain);
     } catch (err) {
       // DB not available or other error — leave allowedDomains as null and treat as permissive
+      logger.error({ err }, 'Error fetching allowed domains from DB for link validation');
       allowedDomains = null;
     }
   }
