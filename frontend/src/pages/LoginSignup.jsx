@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import Button from "../components/Button";
 import ChooseCategoryModal from "../components/ChooseCategoryModal";
+import { setToken } from '../utils/token';
 import "./LoginSignup.css";
 
 export default function LoginSignup({ initialMode = "login" }) {
@@ -127,20 +128,16 @@ export default function LoginSignup({ initialMode = "login" }) {
         throw new Error("Răspuns invalid: token lipsă.");
       }
 
-      localStorage.setItem("authToken", token);
+      setToken(token);
       navigate("/home");
     } catch (err) {
       setErrors({ message: err?.message || "A apărut o eroare. Încearcă din nou." });
       console.error(err);
     } finally {
       setIsSubmitting(false);
+      setIsCategoryModalOpen(true);
     }
   };
-
-  // // Simulate signup: persist basic user info and open category modal
-  // const userObj = { name: formData.name || formData.email, email: formData.email };
-  // localStorage.setItem('user', JSON.stringify(userObj));
-  // setIsCategoryModalOpen(true);
 
   return (
     <div className="login-signup-container">

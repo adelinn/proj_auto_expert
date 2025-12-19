@@ -1,4 +1,10 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  Link,
+} from "react-router-dom";
 import Navigation from "./components/Navigation";
 import Home from "./pages/Home";
 import "./App.css";
@@ -8,26 +14,44 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Questions from "./pages/Questions";
 import Quiz from "./pages/Quiz";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
   return (
     <Router>
-      <NeonBlobsBackground />
-      <Navigation />
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginSignup initialMode="login" />} />
-        <Route path="/signup" element={<LoginSignup initialMode="signup" />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/questions" element={<Questions />} />
-        <Route path="*" element={<Navigate to="/home" replace />} />
+      <AuthProvider>
+        <NeonBlobsBackground />
+        <Navigation />
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LoginSignup initialMode="login" />} />
+          <Route
+            path="/signup"
+            element={<LoginSignup initialMode="signup" />}
+          />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/questions" element={<Questions />} />
+          <Route path="*" element={<Navigate to="/home" replace />} />
 
-        {/* Protected pages */}
-        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-        <Route path="/quiz/:id" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
-      </Routes>
-
-
+          {/* Protected pages */}
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/quiz/:id"
+            element={
+              <ProtectedRoute>
+                <Quiz />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }
