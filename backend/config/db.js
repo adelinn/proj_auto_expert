@@ -14,17 +14,28 @@ import logger from '../server/logger.js';
  */
 export async function migrateLatest() {
   if (process.env.RUN_MIGRATIONS_ON_START === '1') {
-    logger.info('Running DB migrations (RUN_MIGRATIONS_ON_START=1)');
-    await db.migrate.latest();
-    logger.info('DB migrations finished');
+    try {
+      logger.info('Running DB migrations (RUN_MIGRATIONS_ON_START=1)');
+      await db.migrate.latest();
+      logger.info('DB migrations finished');
+    } catch (err) {
+      logger.error({ err }, 'DB migration failed');
+      throw err;
+    }
   }
 } 
 
 /**
  * Graceful shutdown helper to destroy the Knex connection pool
  */
-export function destroyDb() {
-  return db.destroy();
+export async function destroyDb() {
+  try {
+    await db.destroy();
+    logger.info('Database connection pool closed');
+  } catch (err) {
+    logger.error({ err }, 'Error closing database connection pool');
+    throw err;
+  }
 }
 
 export default db;

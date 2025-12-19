@@ -1,10 +1,12 @@
 import logger from '../server/logger.js';
 
 export const getProjects = async (req, res) => {
+  const log = req?.log || logger;
   try {
     const projects = {};
     res.json(projects);
   } catch (err) {
+    log.error({ err }, 'Error fetching projects');
     res.status(500).send('Server Error');
   }
 };

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import logger from '../server/logger.js';
 
 export const zId = z.coerce.number().int().positive();
 export const zFlag01 = z.coerce.number().int().min(0).max(1);
@@ -31,6 +32,12 @@ export function parseInput(schema, value, message = "Invalid input") {
 export function parseDb(schema, value, message = "Invalid data from database") {
   const res = schema.safeParse(value);
   if (res.success) return res.data;
+  // Log database validation errors as they indicate data integrity issues
+  logger.error({ 
+    error: res.error.flatten(), 
+    value,
+    message 
+  }, 'Database data validation failed - possible data corruption');
   throw makeHttpError(message, 500, res.error.flatten());
 }
 

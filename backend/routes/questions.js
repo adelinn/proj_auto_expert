@@ -1,15 +1,18 @@
 import express from 'express';
 import { body, param, validationResult } from 'express-validator';
 import * as intrebari from '../repositories/intrebari.js';
+import logger from '../server/logger.js';
 
 const router = express.Router();
 
 // GET /api/questions
 router.get('/', async (req, res, next) => {
+  const log = req?.log || logger;
   try {
     const rows = await intrebari.getAll();
     res.json(rows);
   } catch (err) {
+    log.error({ err }, 'Error fetching all questions');
     next(err);
   }
 });
@@ -21,11 +24,13 @@ router.get(
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    const log = req?.log || logger;
     try {
       const row = await intrebari.getById(req.params.id);
       if (!row) return res.status(404).json({ error: 'Not found' });
       res.json(row);
     } catch (err) {
+      log.error({ err, questionId: req.params.id }, 'Error fetching question by ID');
       next(err);
     }
   }
@@ -40,11 +45,13 @@ router.post(
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    const log = req?.log || logger;
     try {
       const { text, id_poza, tipQ_1xR } = req.body;
       const created = await intrebari.create({ text, id_poza, tipQ_1xR });
       res.status(201).json(created);
     } catch (err) {
+      log.error({ err, body: req.body }, 'Error creating question');
       next(err);
     }
   }
@@ -60,10 +67,12 @@ router.put(
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    const log = req?.log || logger;
     try {
       const updated = await intrebari.update(req.params.id, req.body);
       res.json(updated);
     } catch (err) {
+      log.error({ err, questionId: req.params.id, body: req.body }, 'Error updating question');
       next(err);
     }
   }
@@ -76,10 +85,12 @@ router.delete(
   async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    const log = req?.log || logger;
     try {
       await intrebari.delete(req.params.id);
       res.status(204).end();
     } catch (err) {
+      log.error({ err, questionId: req.params.id }, 'Error deleting question');
       next(err);
     }
   }

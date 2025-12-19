@@ -80,7 +80,7 @@ async function start() {
     process.on('SIGINT', shutdown);
     process.on('SIGTERM', shutdown);
   } catch (err) {
-    console.error('Failed to start server', err);
+    logger.error({ err }, 'Failed to start server');
     process.exit(1);
   }
 }
