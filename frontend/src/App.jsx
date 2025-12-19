@@ -13,7 +13,6 @@ import "./App.css";
 import NeonBlobsBackground from "./components/NeonBlobsBackground";
 import LoginSignup from "./pages/LoginSignup";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
-import Questions from "./pages/Questions";
 import Quiz from "./pages/Quiz";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContextX";
@@ -65,7 +64,6 @@ function App() {
             element={<LoginSignup initialMode="signup" />}
           />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/questions" element={<Questions />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
 
           {/* Protected pages */}
