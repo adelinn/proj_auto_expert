@@ -12,6 +12,8 @@ resource "google_project_service" "main" {
     "serviceusage.googleapis.com",
     "secretmanager.googleapis.com",
     "sqladmin.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "run.googleapis.com",
   ])
   service = each.key
 
@@ -34,4 +36,10 @@ resource "github_actions_variable" "gcp_project_id" {
   repository    = local.repo_name
   variable_name = "GCP_PROJECT_ID"
   value         = data.google_project.main.project_id
+}
+
+resource "github_actions_variable" "gcp_region" {
+  repository    = local.repo_name
+  variable_name = "GCP_REGION"
+  value         = local.props.gcp.location
 }
