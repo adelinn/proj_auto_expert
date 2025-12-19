@@ -7,6 +7,15 @@ on:
     paths:
       - "frontend/**"
       - "!frontend/README.md"
+  workflow_run:
+    workflows:
+      - "Deploy backend"
+    types:
+      - completed
+
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
