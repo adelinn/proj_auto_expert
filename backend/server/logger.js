@@ -18,6 +18,8 @@ const logger = pino({
   transport
 });
 
+console.log(`Logging with level: ${process.env.LOG_LEVEL || 'info'}`);
+
 // HTTP middleware that attaches req.log and a stable req.id
 export const httpLogger = pinoHttp({
   logger,
