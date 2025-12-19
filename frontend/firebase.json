@@ -9,16 +9,16 @@
     ],
     "rewrites": [
       {
-        "source": "/api",
+        "source": "**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/api/**",
         "run": {
           "serviceId": "backend-prod",
           "region": "europe-west4",
           "pinTag": true
         }
-      },
-      {
-        "source": "**",
-        "destination": "/index.html"
       }
     ]
   }

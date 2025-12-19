@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
       setIsLoading(true);
       
       // Validate token first
-      const isValid = validateAndCleanToken(navigate);
+      const isValid = validateAndCleanToken();
       
       if (!isValid) {
         setUserData(null);
@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
       }
 
       // Decode and store token data
-      const decoded = decodeAndStoreToken(navigate);
+      const decoded = decodeAndStoreToken();
       
       if (decoded) {
         setUserData(decoded);
@@ -54,12 +54,12 @@ export function AuthProvider({ children }) {
   // Re-validate token periodically (every 5 minutes)
   useEffect(() => {
     const interval = setInterval(() => {
-      const isValid = validateAndCleanToken(navigate);
+      const isValid = validateAndCleanToken();
       if (!isValid) {
         setUserData(null);
       } else {
         // Refresh decoded data
-        const decoded = decodeAndStoreToken(navigate);
+        const decoded = decodeAndStoreToken();
         if (decoded) {
           setUserData(decoded);
         } else {
@@ -78,7 +78,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!userData,
     // Helper to refresh token data
     refreshAuth: () => {
-      const decoded = decodeAndStoreToken(navigate);
+      const decoded = decodeAndStoreToken();
       setUserData(decoded);
     }
   };

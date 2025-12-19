@@ -65,24 +65,14 @@ function isTokenValid(token) {
  * @param {Function} navigate - React Router navigate function (optional, for redirect)
  * @returns {boolean} - True if token is valid, false otherwise
  */
-export function validateAndCleanToken(navigate = null) {
+export function validateAndCleanToken() {
   const token = localStorage.getItem(TOKEN_KEY);
 
   if (!token || !isTokenValid(token)) {
     // Remove invalid token
     localStorage.removeItem(TOKEN_KEY);
-    
-    // Redirect to login if navigate function is provided
-    if (navigate && typeof navigate === 'function') {
-      navigate('/login', { replace: true });
-    } else if (typeof window !== 'undefined' && window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
-      // Fallback: use window.location if navigate is not available
-      window.location.href = '/login';
-    }
-    
     return false;
   }
-
   return true;
 }
 
@@ -92,26 +82,16 @@ export function validateAndCleanToken(navigate = null) {
  * @param {Function} navigate - React Router navigate function (optional, for redirect)
  * @returns {object|null} - Decoded token payload or null if invalid
  */
-export function decodeAndStoreToken(navigate = null) {
+export function decodeAndStoreToken() {
   const token = localStorage.getItem(TOKEN_KEY);
 
   if (!token) {
-    if (navigate && typeof navigate === 'function') {
-      navigate('/login', { replace: true });
-    } else if (typeof window !== 'undefined' && window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
-      window.location.href = '/login';
-    }
     return null;
   }
 
   // Validate token first
   if (!isTokenValid(token)) {
     localStorage.removeItem(TOKEN_KEY);
-    if (navigate && typeof navigate === 'function') {
-      navigate('/login', { replace: true });
-    } else if (typeof window !== 'undefined' && window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
-      window.location.href = '/login';
-    }
     return null;
   }
 

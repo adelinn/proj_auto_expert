@@ -1,9 +1,10 @@
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 
 export default function PrivacyPolicy() {
   return (
     <main className="privacy-policy" style={{padding: '2rem', maxWidth: 880, margin: '0 auto', color: 'var(--color-beige-100)'}}>
-      <article style={{background: 'rgba(8,10,14,0.36)', padding: '2rem', borderRadius: 12, boxShadow: '0 18px 60px rgba(2,6,23,0.6)'}}>
+      <article style={{padding: '2rem', borderRadius: 12, boxShadow: '0 18px 60px rgba(2,6,23,0.6)'}}>
         <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:16}}>
           <div>
             <h1 style={{marginTop:0}}>Politica de confidențialitate — Semni</h1>
@@ -12,7 +13,7 @@ export default function PrivacyPolicy() {
 
           <div style={{display:'flex', gap:8}}>
             <button onClick={() => window.print()} className="btn-download" style={{background: 'linear-gradient(90deg,#06b6d4,#3b82f6)', color:'#fff', border:'none', padding:'8px 12px', borderRadius:8, fontWeight:700}}>Descarcă (PDF)</button>
-            <Link to="/login" style={{color:'rgba(255,255,255,0.88)'}}>Închide</Link>
+            <Link to="/login" style={{color:'rgba(255,255,255,0.88)'}}><XMarkIcon className="size-8 fill-white/30"/></Link>
           </div>
         </div>
 
@@ -33,8 +34,7 @@ export default function PrivacyPolicy() {
         </p>
         <ul>
           <li>
-            Date de identificare: nume, prenume, adresă de email, număr de telefon (opțional) și date
-            de autentificare, în cazul în care creați un cont.
+            <strong>Date de identificare și autentificare:</strong> Când creați un cont, colectăm și stocăm în baza noastră de date următoarele informații: numele complet, adresa de email și parola (care este stocată în format criptat folosind tehnologii de securitate avansate). De asemenea, putem colecta numărul de telefon (opțional) pentru comunicări administrative.
           </li>
           <li>
             Date academice și de utilizare: programe urmate, note, progres în cursuri, preferințe de
@@ -88,8 +88,7 @@ export default function PrivacyPolicy() {
             mai bună (ex: limbă, setări interfată);
           </li>
           <li>
-            Cookie-uri de marketing și analytic (opțional): susțin analize atente și îmbunătățiri și
-            pot fi folosite de terți pentru statistici anonime.
+            <strong>Cookie-uri de analiză și marketing:</strong> Folosim <strong>Google Analytics</strong> pentru a analiza modul în care utilizatorii interacționează cu aplicația noastră. Google Analytics colectează informații despre utilizarea site-ului, cum ar fi paginile vizitate, timpul petrecut pe fiecare pagină, sursa de trafic și comportamentul utilizatorilor. Aceste date sunt procesate de Google în conformitate cu politica de confidențialitate a Google. Puteți dezactiva cookie-urile Google Analytics prin setările browserului sau prin extensii dedicate.
           </li>
         </ul>
         <p>
@@ -101,9 +100,10 @@ export default function PrivacyPolicy() {
         <h2>Stocarea și securitatea datelor</h2>
         <p>
           Implementăm măsuri tehnice și organizatorice adecvate pentru a proteja datele personale
-          împotriva accesului neautorizat, pierderii, modificării sau divulgării. Măsurile includ:
+          împotriva accesului neautorizat, pierderii, modificării sau divulgării. Datele dvs. personale, inclusiv numele, email-ul și parola, sunt stocate în baza noastră de date securizată. Măsurile de securitate includ:
         </p>
         <ul>
+          <li><strong>Securitatea parolelor:</strong> Parolele sunt stocate folosind algoritmi de criptare unidirecțională (hashing) cu salt, asigurând că chiar și în cazul unui acces neautorizat la baza de date, parolele nu pot fi recuperate în format text clar;</li>
           <li>criptarea datelor sensibile în tranzit (TLS) și, acolo unde este necesar, în repaus;</li>
           <li>controlul strict al accesului intern pe principiul minimului privilegiu;</li>
           <li>aplicarea de politici de backup și planuri de recuperare în caz de incident;</li>
@@ -160,8 +160,8 @@ export default function PrivacyPolicy() {
           și securitatea datelor.
         </p>
         <ul>
-          <li>Furnizori de infrastructură (hosting, baze de date)</li>
-          <li>Furnizori de servicii de analiză (ex: Google Analytics, la opțiunea utilizatorului)</li>
+          <li>Furnizori de infrastructură (hosting, baze de date) - pentru stocarea securizată a datelor dvs., inclusiv numele, email-ul și parolele criptate</li>
+          <li><strong>Google Analytics:</strong> Folosim Google Analytics pentru analiza utilizării aplicației. Google Analytics poate colecta informații despre interacțiunile dvs. cu aplicația, dar nu accesează datele dvs. personale de autentificare (nume, email, parolă) stocate în baza noastră de date. Datele colectate de Google Analytics sunt procesate conform politicii de confidențialitate Google și pot include informații despre paginile vizitate, durata sesiunilor și comportamentul de navigare.</li>
           <li>Servicii de comunicare și notificări (email, SMS)</li>
         </ul>
 
@@ -191,8 +191,8 @@ export default function PrivacyPolicy() {
           mai sus, ne puteți contacta la:
         </p>
         <ul>
-          <li>Email: privacy@semni.example</li>
-          <li>Adresă: Str. Exemplu 123, Localitate, Țară</li>
+          <li>Email: adelin.nic3+DPO@gmail.com</li>
+          <li>Adresă: Str. Frasinului 1, Tegheș-Domnești, România</li>
         </ul>
 
         <h2>Notă finală</h2>
