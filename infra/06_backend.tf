@@ -114,14 +114,14 @@ resource "google_cloud_run_v2_service" "main" {
 }
 
 # Allow public access to the API
-# resource "google_cloud_run_v2_service_iam_binding" "main" {
-#   location = google_cloud_run_v2_service.main.location
-#   name     = google_cloud_run_v2_service.main.name
-#   role     = "roles/run.invoker"
-#   members = [
-#     "allUsers"
-#   ]
-# }
+resource "google_cloud_run_v2_service_iam_binding" "main" {
+  location = google_cloud_run_v2_service.main.location
+  name     = google_cloud_run_v2_service.main.name
+  role     = "roles/run.invoker"
+  members = [
+    "allUsers"
+  ]
+}
 
 ### Service Account
 resource "google_service_account" "cloud_run_agent" {
