@@ -32,6 +32,8 @@ export function validateGeminiConfig() {
 
 import logger from '../server/logger.js';
 import { z } from 'zod';
+import crypto from 'crypto';
+import { getCachedAnalysis, setCachedAnalysis } from './cache.js';
 
 // Zod schema for Gemini analysis output
 const SentimentEnum = z.enum(['positive', 'negative', 'neutral']);
@@ -83,8 +85,23 @@ export async function analyzeLinks(links) {
     };
   } 
 
+  // Canonicalize links for consistent caching (trim, unique, sort)
+  const canonicalLinks = Array.from(new Set((links || []).map(l => (l || '').trim()).filter(Boolean))).sort();
+
+  // Cache key includes model and links
+  const cacheKey = crypto
+    .createHash('sha256')
+    .update(JSON.stringify({ model: modelId, links: canonicalLinks }))
+    .digest('hex');
+
+  // Try cache first
+  const cached = await getCachedAnalysis(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
   // 1. Gather data
-  const contents = await Promise.all(links.map(link => fetchPageContent(link)));
+  const contents = await Promise.all(canonicalLinks.map(link => fetchPageContent(link)));
   const joinedContent = contents.join('\n');
 
   // 2. Construct Prompt
@@ -105,12 +122,10 @@ export async function analyzeLinks(links) {
     }
   `;
 
-  // 3. Call Gemini
+  // 3. Call Gemini with retry/backoff and circuit breaker
   let text;
   try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    text = response.text();
+    text = await callGeminiWithResilience(model, prompt, modelId);
   } catch (error) {
     logger.error({ err: error, model: modelId || 'unknown' }, 'Gemini generateContent failed');
     return {
@@ -149,5 +164,99 @@ export async function analyzeLinks(links) {
     };
   }
 
+  // Store in cache (best-effort)
+  setCachedAnalysis(cacheKey, validation.data);
+
   return validation.data;
+}
+
+// Resilience settings (retry + circuit breaker)
+const MAX_RETRIES = Number(process.env.GEMINI_MAX_RETRIES || 3);
+const BASE_DELAY_MS = Number(process.env.GEMINI_RETRY_BASE_MS || 200);
+const CIRCUIT_FAILURES = Number(process.env.GEMINI_CIRCUIT_FAILURES || 5);
+const CIRCUIT_COOLDOWN_MS = Number(process.env.GEMINI_CIRCUIT_COOLDOWN_MS || 60000);
+
+// Simple circuit breaker state
+const circuitState = {
+  openUntil: 0,
+  consecutiveFailures: 0
+};
+
+function isCircuitOpen() {
+  if (Date.now() < circuitState.openUntil) return true;
+  return false;
+}
+
+function recordFailure(modelId, err, failureThreshold, cooldownMs) {
+  circuitState.consecutiveFailures += 1;
+  if (circuitState.consecutiveFailures >= failureThreshold) {
+    circuitState.openUntil = Date.now() + cooldownMs;
+    circuitState.consecutiveFailures = 0;
+    logger.warn({ model: modelId, err }, 'Gemini circuit opened due to repeated failures');
+  }
+}
+
+function recordSuccess() {
+  circuitState.consecutiveFailures = 0;
+  circuitState.openUntil = 0;
+}
+
+function isRetryable(error) {
+  const status = error?.response?.status;
+  if (!status) return true; // network/unknown
+  if (status >= 500) return true;
+  if (status === 429) return true;
+  return false;
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Exported for tests
+export async function callGeminiWithResilience(model, prompt, modelId, overrides = {}) {
+  const maxRetries = overrides.maxRetries ?? MAX_RETRIES;
+  const baseDelay = overrides.baseDelayMs ?? BASE_DELAY_MS;
+  const circuitFailures = overrides.circuitFailures ?? CIRCUIT_FAILURES;
+  const circuitCooldown = overrides.circuitCooldownMs ?? CIRCUIT_COOLDOWN_MS;
+
+  if (Date.now() < circuitState.openUntil) {
+    const msLeft = circuitState.openUntil - Date.now();
+    throw new Error(`Gemini temporarily unavailable (circuit open, retry in ${msLeft}ms)`);
+  }
+
+  let attempt = 0;
+  let delay = baseDelay;
+  while (attempt <= maxRetries) {
+    try {
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      recordSuccess();
+      return text;
+    } catch (err) {
+      const retryable = isRetryable(err);
+      recordFailure(modelId, err, circuitFailures, circuitCooldown);
+
+      // If circuit just opened, fail fast
+      if (Date.now() < circuitState.openUntil) {
+        throw new Error(`Gemini temporarily unavailable (circuit open). ${err?.message || ''}`);
+      }
+
+      if (!retryable || attempt === maxRetries) {
+        throw err;
+      }
+
+      await sleep(delay);
+      delay = Math.min(delay * 2, baseDelay * 8);
+      attempt += 1;
+    }
+  }
+  throw new Error('Unexpected Gemini retry loop termination');
+}
+
+// For tests to reset circuit state
+export function __resetGeminiCircuit() {
+  circuitState.openUntil = 0;
+  circuitState.consecutiveFailures = 0;
 }

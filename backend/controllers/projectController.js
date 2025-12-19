@@ -1,5 +1,6 @@
 import Project from '../models/Project.js';
 import { analyzeLinks } from '../services/geminiService.js';
+import { enqueueAnalysis } from '../server/analysisQueue.js';
 import logger from '../server/logger.js';
 
 export const getProjects = async (req, res) => {
@@ -37,9 +38,9 @@ export const createProject = async (req, res) => {
       analysis: null // Pending
     });
     
-    // 2. Trigger AI Analysis
-    const analysisResult = await analyzeLinks(valid);
-    project.analysis = analysisResult;
+    // 2. Enqueue AI Analysis (async). Client can poll project to see completion.
+    const job = await enqueueAnalysis({ links: valid, userId: req.user.id, projectId: project._id?.toString() });
+    project.analysis = { status: 'queued', jobId: job.id };
 
     await project.save();
     res.json(project);

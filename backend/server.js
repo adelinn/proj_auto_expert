@@ -2,29 +2,23 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-
 import authRoutes from './routes/authRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import questionsRoutes from './routes/questions.js';
 import { migrateLatest, destroyDb } from './config/db.js';
 import { validateGeminiConfig } from './server/geminiService.js';
 import logger, { httpLogger } from './server/logger.js';
+import { generalLimiter, authLimiter } from './middleware/rateLimiters.js';
 
 const app = express();
 
 // Security middlewares
 app.use(helmet());
 app.use(express.json({ limit: '10kb' })); // limit JSON body size
+app.use(express.urlencoded({ extended: true, limit: '10kb' })); // guard urlencoded too
 
-// Basic rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // limit each IP to 200 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false
-});
-app.use(limiter);
+// Basic rate limiting (global) and stricter for auth endpoints
+app.use(generalLimiter);
 
 // CORS
 const allowedOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
@@ -41,7 +35,7 @@ app.use(cors(corsOptions)); // Express handles OPTIONS automatically with cors
 app.use(httpLogger);
 
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/questions', questionsRoutes);
 
