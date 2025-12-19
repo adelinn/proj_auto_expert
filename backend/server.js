@@ -15,7 +15,7 @@ const app = express();
 // Security middlewares
 app.use(helmet());
 app.use(express.json({ limit: '10kb' })); // limit JSON body size
-app.set('trust proxy', 2); // Configure for Cloud Run
+app.set('trust proxy', 1); // Configure for Cloud Run
 
 // Basic rate limiting
 const limiter = rateLimit({
