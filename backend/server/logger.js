@@ -13,9 +13,28 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
+// https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity
+const PinoLevelToSeverityLookup = {
+  trace: 'DEBUG',
+  debug: 'DEBUG',
+  info: 'INFO',
+  warn: 'WARNING',
+  error: 'ERROR',
+  fatal: 'CRITICAL',
+};
+
 const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
-  transport
+  transport,
+  messageKey: 'message',
+  formatters: {
+    level(label, number) {
+      return {
+        severity: PinoLevelToSeverityLookup[label] || PinoLevelToSeverityLookup['info'],
+        level: number,
+      }
+    }
+  },
 });
 
 console.log(`Logging with level: ${process.env.LOG_LEVEL || 'info'}`);
