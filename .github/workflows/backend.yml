@@ -1,4 +1,4 @@
-name: "Deploy frontend"
+name: "Deploy backend"
 on:
   workflow_dispatch:
   push:
