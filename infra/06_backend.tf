@@ -2,13 +2,10 @@ locals {
   cloud_run_envs = {
     CLIENT_ORIGIN = "http://localhost:5173"
 
-    DB_HOST = "/cloudsql/${google_sql_database_instance.main.connection_name}"
-    DB_USER = google_sql_user.db_admin.name
-    DB_NAME = google_sql_database.database.name
-
-    # SSL mode is disabled here because the Cloud SQL instance is configured to require SSL and we use the Cloud Run - Cloud SQL integration
-    # which creates a secure tunnel to the Cloud SQL instance. Read more here https://cloud.google.com/sql/docs/postgres/configure-ssl-instance#enforcing-ssl
-    DB_SSL = "false"
+    DB_SOCKET_PATH = "/cloudsql/${google_sql_database_instance.main.connection_name}"
+    DB_USER        = google_sql_user.db_admin.name
+    DB_NAME        = google_sql_database.database.name
+    DB_POOL__MAX   = "20"
 
     LOG_LEVEL = "trace"
   }
@@ -116,14 +113,14 @@ resource "google_cloud_run_v2_service" "main" {
 }
 
 # Allow public access to the API
-resource "google_cloud_run_v2_service_iam_binding" "main" {
-  location = google_cloud_run_v2_service.main.location
-  name     = google_cloud_run_v2_service.main.name
-  role     = "roles/run.invoker"
-  members = [
-    "allUsers"
-  ]
-}
+# resource "google_cloud_run_v2_service_iam_binding" "main" {
+#   location = google_cloud_run_v2_service.main.location
+#   name     = google_cloud_run_v2_service.main.name
+#   role     = "roles/run.invoker"
+#   members = [
+#     "allUsers"
+#   ]
+# }
 
 ### Service Account
 resource "google_service_account" "cloud_run_agent" {
