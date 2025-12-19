@@ -1,25 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCookieConsent } from '../hooks/useCookieConsent';
-import { loadGoogleAnalytics, removeGoogleAnalytics } from '../utils/analytics';
+import { loadFirebaseAnalytics, removeFirebaseAnalytics } from '../utils/analytics';
 
 export default function CookieBanner() {
   const { _consent, hasConsent, acceptCookies: baseAcceptCookies, declineCookies: baseDeclineCookies, isLoading } = useCookieConsent();
   const [isVisible, setIsVisible] = useState(false);
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
     baseAcceptCookies();
-    // Load Google Analytics when consent is given
-    const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
-    if (measurementId) {
-      loadGoogleAnalytics(measurementId);
-    }
+    // Load Firebase Analytics when consent is given
+    await loadFirebaseAnalytics();
   };
 
   const handleDecline = () => {
     baseDeclineCookies();
-    // Remove Google Analytics if consent is declined
-    removeGoogleAnalytics();
+    // Remove Firebase Analytics if consent is declined
+    removeFirebaseAnalytics();
   };
 
   useEffect(() => {
@@ -52,7 +49,7 @@ export default function CookieBanner() {
                     Folosim cookie-uri pentru a îmbunătăți experiența ta
                   </h3>
                   <p className="text-xs text-white/80 leading-relaxed">
-                    Folosim cookie-uri pentru analiză (Google Analytics) pentru a înțelege cum folosești aplicația. 
+                    Folosim cookie-uri pentru analiză (Firebase Analytics) pentru a înțelege cum folosești aplicația. 
                     Poți accepta sau refuza cookie-urile de analiză.{' '}
                     <Link 
                       to="/privacy-policy" 

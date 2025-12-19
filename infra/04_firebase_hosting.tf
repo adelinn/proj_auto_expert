@@ -54,3 +54,18 @@ resource "github_actions_variable" "firebase_measurement_id" {
   variable_name = "FIREBASE_MEASUREMENT_ID"
   value         = data.google_firebase_web_app_config.main.measurement_id
 }
+
+resource "github_actions_variable" "firebase_config" {
+  repository    = local.repo_name
+  variable_name = "FIREBASE_CONFIG"
+  value = jsonencode({
+    apiKey            = data.google_firebase_web_app_config.main.api_key
+    authDomain        = data.google_firebase_web_app_config.main.auth_domain
+    databaseURL       = data.google_firebase_web_app_config.main.database_url
+    projectId         = data.google_project.main.project_id
+    storageBucket     = data.google_firebase_web_app_config.main.storage_bucket
+    messagingSenderId = data.google_firebase_web_app_config.main.messaging_sender_id
+    appId             = data.google_firebase_web_app_config.main.web_app_id
+    measurementId     = data.google_firebase_web_app_config.main.measurement_id
+  })
+}

@@ -1,64 +1,60 @@
 /**
- * Google Analytics utility
- * Only loads and initializes GA if user has given consent
+ * Firebase Analytics utility
+ * Only initializes and tracks if user has given consent
  */
 
-let gtagLoaded = false;
-let measurementId = null;
+import { initAnalytics, getAnalyticsInstance, disableAnalytics } from '../config/firebase.js';
+import { logEvent, setAnalyticsCollectionEnabled } from 'firebase/analytics';
+
+let analyticsInitialized = false;
 
 /**
- * Remove Google Analytics (for when consent is revoked)
+ * Initialize Firebase Analytics (only if consent is given)
+ * @returns {Promise<boolean>} - True if initialized successfully
  */
-export function removeGoogleAnalytics() {
-  if (typeof window === 'undefined') return;
-  
-  // Remove gtag script
-  const scripts = document.querySelectorAll('script[src*="googletagmanager.com"]');
-  scripts.forEach(script => script.remove());
-  
-  // Clear dataLayer
-  if (window.dataLayer) {
-    window.dataLayer = [];
+export async function loadFirebaseAnalytics() {
+  if (analyticsInitialized) {
+    return true;
   }
-  
-  // Remove gtag function
-  if (window.gtag) {
-    delete window.gtag;
+
+  if (typeof window === 'undefined') {
+    return false;
   }
-  
-  gtagLoaded = false;
-  measurementId = null;
+
+  try {
+    const analytics = await initAnalytics();
+    if (analytics) {
+      // Enable analytics collection
+      await setAnalyticsCollectionEnabled(analytics, true);
+      analyticsInitialized = true;
+      return true;
+    }
+    return false;
+  } catch (err) {
+    console.error('Failed to load Firebase Analytics:', err);
+    return false;
+  }
 }
 
 /**
- * Load Google Analytics script
- * @param {string} id - Google Analytics Measurement ID (G-XXXXXXXXXX)
+ * Remove/Disable Firebase Analytics (for when consent is revoked)
  */
-export function loadGoogleAnalytics(id) {
-  if (typeof window === 'undefined' || gtagLoaded) return;
+export function removeFirebaseAnalytics() {
+  if (typeof window === 'undefined') return;
   
-  measurementId = id;
-  
-  // Load gtag.js script
-  const script1 = document.createElement('script');
-  script1.async = true;
-  script1.src = `https://www.googletagmanager.com/gtag/js?id=${id}`;
-  document.head.appendChild(script1);
-
-  // Initialize dataLayer and gtag
-  window.dataLayer = window.dataLayer || [];
-  function gtag(...args) {
-    window.dataLayer.push(args);
+  try {
+    const analytics = getAnalyticsInstance();
+    if (analytics) {
+      // Disable analytics collection
+      setAnalyticsCollectionEnabled(analytics, false).catch(err => {
+        console.error('Failed to disable analytics:', err);
+      });
+    }
+    disableAnalytics();
+    analyticsInitialized = false;
+  } catch (err) {
+    console.error('Error removing Firebase Analytics:', err);
   }
-  window.gtag = gtag;
-
-  gtag('js', new Date());
-  gtag('config', id, {
-    anonymize_ip: true, // GDPR compliance
-    cookie_flags: 'SameSite=None;Secure',
-  });
-
-  gtagLoaded = true;
 }
 
 /**
@@ -67,12 +63,22 @@ export function loadGoogleAnalytics(id) {
  * @param {string} title - Page title (optional)
  */
 export function trackPageView(path, title = null) {
-  if (!gtagLoaded || !window.gtag) return;
+  if (!analyticsInitialized) return;
   
-  window.gtag('config', measurementId, {
-    page_path: path,
-    ...(title && { page_title: title })
-  });
+  try {
+    const analytics = getAnalyticsInstance();
+    if (!analytics) return;
+
+    // Firebase Analytics automatically tracks page views, but we can log a custom event
+    logEvent(analytics, 'page_view', {
+      page_path: path,
+      ...(title && { page_title: title })
+    }).catch(err => {
+      console.error('Error tracking page view:', err);
+    });
+  } catch (err) {
+    console.error('Error tracking page view:', err);
+  }
 }
 
 /**
@@ -81,16 +87,29 @@ export function trackPageView(path, title = null) {
  * @param {object} eventParams - Event parameters (optional)
  */
 export function trackEvent(eventName, eventParams = {}) {
-  if (!gtagLoaded || !window.gtag) return;
+  if (!analyticsInitialized) return;
   
-  window.gtag('event', eventName, eventParams);
+  try {
+    const analytics = getAnalyticsInstance();
+    if (!analytics) return;
+
+    logEvent(analytics, eventName, eventParams).catch(err => {
+      console.error('Error tracking event:', err);
+    });
+  } catch (err) {
+    console.error('Error tracking event:', err);
+  }
 }
 
 /**
- * Check if Google Analytics is loaded
+ * Check if Firebase Analytics is loaded
  * @returns {boolean}
  */
 export function isAnalyticsLoaded() {
-  return gtagLoaded && typeof window !== 'undefined' && window.gtag;
+  return analyticsInitialized && getAnalyticsInstance() !== null;
 }
+
+// Legacy function names for backward compatibility
+export const loadGoogleAnalytics = loadFirebaseAnalytics;
+export const removeGoogleAnalytics = removeFirebaseAnalytics;
 

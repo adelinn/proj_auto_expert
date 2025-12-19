@@ -18,21 +18,24 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContextX";
 import CookieBanner from "./components/CookieBanner";
 import { hasAnalyticsConsent } from "./utils/cookieConsent";
-import { loadGoogleAnalytics, trackPageView } from "./utils/analytics";
+import { loadFirebaseAnalytics, trackPageView } from "./utils/analytics";
 
-// Component to handle Google Analytics page tracking
+// Component to handle Firebase Analytics page tracking
 function AnalyticsTracker() {
   const location = useLocation();
 
   useEffect(() => {
     // Only track if consent is given
     if (hasAnalyticsConsent()) {
-      // Load GA if not already loaded (measurement ID from env or use a placeholder)
-      const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
-      if (measurementId) {
-        loadGoogleAnalytics(measurementId);
-        trackPageView(location.pathname + location.search);
-      }
+      // Load Firebase Analytics if not already loaded, then track page view
+      loadFirebaseAnalytics().then((loaded) => {
+        if (loaded) {
+          // Small delay to ensure analytics is ready
+          setTimeout(() => {
+            trackPageView(location.pathname + location.search);
+          }, 100);
+        }
+      });
     }
   }, [location]);
 
@@ -40,13 +43,10 @@ function AnalyticsTracker() {
 }
 
 function App() {
-  // Load Google Analytics on mount if consent is given
+  // Load Firebase Analytics on mount if consent is given
   useEffect(() => {
     if (hasAnalyticsConsent()) {
-      const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
-      if (measurementId) {
-        loadGoogleAnalytics(measurementId);
-      }
+      loadFirebaseAnalytics();
     }
   }, []);
 

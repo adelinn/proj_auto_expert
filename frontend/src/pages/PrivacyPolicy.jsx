@@ -161,7 +161,7 @@ export default function PrivacyPolicy() {
         </p>
         <ul>
           <li>Furnizori de infrastructură (hosting, baze de date) - pentru stocarea securizată a datelor dvs., inclusiv numele, email-ul și parolele criptate</li>
-          <li><strong>Google Analytics:</strong> Folosim Google Analytics pentru analiza utilizării aplicației. Google Analytics poate colecta informații despre interacțiunile dvs. cu aplicația, dar nu accesează datele dvs. personale de autentificare (nume, email, parolă) stocate în baza noastră de date. Datele colectate de Google Analytics sunt procesate conform politicii de confidențialitate Google și pot include informații despre paginile vizitate, durata sesiunilor și comportamentul de navigare.</li>
+          <li><strong>Firebase Analytics:</strong> Folosim Firebase Analytics pentru analiza utilizării aplicației. Firebase Analytics poate colecta informații despre interacțiunile dvs. cu aplicația, dar nu accesează datele dvs. personale de autentificare (nume, email, parolă) stocate în baza noastră de date. Datele colectate de Firebase Analytics sunt procesate conform politicii de confidențialitate Google (Firebase este un serviciu Google) și pot include informații despre paginile vizitate, durata sesiunilor și comportamentul de navigare.</li>
           <li>Servicii de comunicare și notificări (email, SMS)</li>
         </ul>
 
@@ -173,7 +173,7 @@ export default function PrivacyPolicy() {
         <ul>
           <li>datele contului: pe durata activă a contului și 1-3 ani după dezactivare pentru scopuri
             administrative și legale, după caz;</li>
-          <li>date tehnice și de jurnalizare: perioade rotative (de obicei 6–24 luni) pentru diagnostic
+          <li>date tehnice și de jurnalizare: perioade rotative (de obicei 6-24 luni) pentru diagnostic
             și securitate, cu arhivare anonimizată posibilă pentru analize statistice pe termen lung;</li>
           <li>date legate de tranzacții sau facturare: conform legislației contabile și fiscale aplicabile.</li>
         </ul>

@@ -44,6 +44,7 @@ jobs:
         env:
           VITE_API_BASE_URL: /api
           VITE_GA_MEASUREMENT_ID: ${{ vars.FIREBASE_MEASUREMENT_ID }}
+          VITE_FIREBASE_CONFIG: ${{ vars.FIREBASE_CONFIG }}
       - run: npm run test --if-present
 
       - id: "auth"
