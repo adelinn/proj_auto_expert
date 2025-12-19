@@ -4,7 +4,9 @@ import {
   Route,
   Navigate,
   Link,
+  useLocation,
 } from "react-router-dom";
+import { useEffect } from "react";
 import Navigation from "./components/Navigation";
 import Home from "./pages/Home";
 import "./App.css";
@@ -15,11 +17,44 @@ import Questions from "./pages/Questions";
 import Quiz from "./pages/Quiz";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContextX";
+import CookieBanner from "./components/CookieBanner";
+import { hasAnalyticsConsent } from "./utils/cookieConsent";
+import { loadGoogleAnalytics, trackPageView } from "./utils/analytics";
+
+// Component to handle Google Analytics page tracking
+function AnalyticsTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Only track if consent is given
+    if (hasAnalyticsConsent()) {
+      // Load GA if not already loaded (measurement ID from env or use a placeholder)
+      const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+      if (measurementId) {
+        loadGoogleAnalytics(measurementId);
+        trackPageView(location.pathname + location.search);
+      }
+    }
+  }, [location]);
+
+  return null;
+}
 
 function App() {
+  // Load Google Analytics on mount if consent is given
+  useEffect(() => {
+    if (hasAnalyticsConsent()) {
+      const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+      if (measurementId) {
+        loadGoogleAnalytics(measurementId);
+      }
+    }
+  }, []);
+
   return (
     <Router>
       <AuthProvider>
+        <AnalyticsTracker />
         <NeonBlobsBackground />
         <Navigation />
         <Routes>
@@ -51,6 +86,7 @@ function App() {
             }
           />
         </Routes>
+        <CookieBanner />
       </AuthProvider>
     </Router>
   );
