@@ -1,6 +1,13 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import * as useri from '../repositories/useri.js';
+import { ZodError } from 'zod';
+
+export function isZodError(err) {
+  return Boolean(
+    err && (err instanceof ZodError || err.name === 'ZodError'),
+  );
+}
 
 export const register = async (req, res) => {
   const { username, email, password } = req.body;
@@ -19,7 +26,9 @@ export const register = async (req, res) => {
       res.json({ token });
     });
   } catch (err) {
-    res.status(500).send('Server error'+err.message);
+    if (isZodError(err))
+      return res.status(500).send('Server error');
+    return res.status(500).send('Server error: '+err.message);
   }
 };
 
