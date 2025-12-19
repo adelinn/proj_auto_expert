@@ -28,7 +28,6 @@ export default function LoginSignup({ initialMode = "login" }) {
   const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const location = useLocation();
 
   useEffect(() => {

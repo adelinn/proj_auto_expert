@@ -1,8 +1,7 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { decodeAndStoreToken, validateAndCleanToken } from '../utils/token';
-
-const AuthContext = createContext(null);
+import { AuthContext } from './authContext';
 
 /**
  * AuthContext Provider component
@@ -85,17 +84,5 @@ export function AuthProvider({ children }) {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-/**
- * Hook to access auth context
- * @returns {object} - Auth context value with userData, isLoading, isAuthenticated, refreshAuth
- */
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 }
 

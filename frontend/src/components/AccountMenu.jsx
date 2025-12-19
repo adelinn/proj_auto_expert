@@ -2,7 +2,7 @@ import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserIcon, DocumentTextIcon } from "@heroicons/react/16/solid";
 import { ArrowRightOnRectangleEndIcon } from "@heroicons/react/24/solid";
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { removeToken } from '../utils/token';
 
 export default function AccountMenu() {
