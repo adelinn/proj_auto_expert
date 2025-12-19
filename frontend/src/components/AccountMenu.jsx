@@ -1,7 +1,7 @@
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserIcon, DocumentTextIcon } from "@heroicons/react/16/solid";
-import { ArrowRightOnRectangleEndIcon } from "@heroicons/react/24/solid";
+import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useAuth } from '../hooks/useAuth';
 import { removeToken } from '../utils/token';
 
@@ -61,7 +61,7 @@ export default function AccountMenu() {
           <MenuItem>
             {({ active }) => (
               <button onClick={logout} className={`w-full text-left flex items-center gap-2 px-3 py-2 text-sm ${active ? "bg-white/6" : ""} rounded-md`}>
-                <ArrowRightOnRectangleEndIcon className="size-4 text-white/80" />
+                <ArrowRightStartOnRectangleIcon className="size-4 text-white/80" />
                 Logout
               </button>
             )}
