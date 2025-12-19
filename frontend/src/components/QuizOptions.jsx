@@ -1,6 +1,7 @@
 import { Children, isValidElement, useMemo, useState } from "react";
 import { cn } from "../utils/cn";
 import QuizOption from "./QuizOption";
+import QuizOptionInternal from "./QuizOptionInternal";
 
 function indexToLetter(i) {
   if (i >= 0 && i < 26) return String.fromCharCode(65 + i); // A-Z
@@ -94,7 +95,7 @@ function QuizOptions({
           const childOnSelect = child.props?.onSelect;
 
           return (
-            <QuizOption
+            <QuizOptionInternal
               // Use the child's own key if it has one; otherwise fall back to id.
               key={child.key ?? optionId}
               {...child.props}
@@ -108,7 +109,7 @@ function QuizOptions({
               className={cn(child.props?.className, optionClassName)}
             >
               {child.props?.children}
-            </QuizOption>
+            </QuizOptionInternal>
           );
         })}
       </div>

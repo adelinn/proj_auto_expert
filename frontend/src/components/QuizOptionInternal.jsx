@@ -71,7 +71,7 @@ function QuizOption({
             )}
             onClick={activate}
           >
-            {letter[0].toLocalUpperCase()}
+            {letter[0].toLocaleUpperCase()}
           </Btn>
         </div>
         <p
