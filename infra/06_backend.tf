@@ -3,7 +3,6 @@ locals {
     CLIENT_ORIGIN = "http://localhost:5173"
 
     DB_HOST = "/cloudsql/${google_sql_database_instance.main.connection_name}"
-    DB_PORT = "3306"
     DB_USER = google_sql_user.db_admin.name
     DB_NAME = google_sql_database.database.name
 
