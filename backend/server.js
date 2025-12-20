@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import authRoutes from './routes/authRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import questionsRoutes from './routes/questions.js';
+import questionnaireRoutes from './routes/questionnaireRoutes.js';
 import { migrateLatest, destroyDb } from './config/db.js';
 import logger, { httpLogger } from './server/logger.js';
 import { generalLimiter, authLimiter } from './middleware/rateLimiters.js';
@@ -40,6 +41,7 @@ app.use(httpLogger);
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/questions', questionsRoutes);
+app.use('/api', questionnaireRoutes);
 
 // Admin routes (managing allowed domains etc)
 import adminRoutes from './routes/adminRoutes.js';
