@@ -37,6 +37,15 @@ app.use(cors(corsOptions)); // Express handles OPTIONS automatically with cors
 // Request logger (adds req.log and req.id)
 app.use(httpLogger);
 
+// Health check endpoint (before other routes, no auth needed)
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // Routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/projects', projectRoutes);
@@ -47,14 +56,31 @@ app.use('/api', questionnaireRoutes);
 import adminRoutes from './routes/adminRoutes.js';
 app.use('/api/admin', adminRoutes);
 
+// 404 handler for undefined routes
+app.use((req, res) => {
+  res.status(404).json({ 
+    error: 'Route not found',
+    path: req.path,
+    method: req.method 
+  });
+});
+
 // Centralized error handler (last middleware)
 app.use((err, req, res, next) => {
   const status = err.status || 500;
-  const safeMessage = process.env.NODE_ENV === 'production' ? 'Server error' : err.message || 'Server error';
+  const message = err.message || 'Server error';
+  
   // Prefer request-scoped logger when available
   const log = req?.log || logger;
-  log.error({ err, status }, 'Unhandled error');
-  res.status(status).json({ error: safeMessage });
+  log.error({ err, status, path: req.path }, 'Unhandled error');
+  
+  // Send consistent error response
+  res.status(status).json({ 
+    error: process.env.NODE_ENV === 'production' && status === 500 
+      ? 'Internal server error' 
+      : message,
+    status
+  });
 });
 
 // Start server and optionally run migrations
