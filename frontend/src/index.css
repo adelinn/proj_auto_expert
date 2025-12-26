@@ -23,6 +23,16 @@ body {
   min-height: 100vh;
 }
 
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: thin;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}
+
 /* @media (prefers-color-scheme: light) {
   :root {
     color: var(--color-beige-900);

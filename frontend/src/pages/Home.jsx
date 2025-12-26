@@ -155,7 +155,14 @@ function Home() {
           const ctaLabel = completed > 0 ? 'Continuă' : 'Începe';
 
           return (
-            <div key={q.id} className="card glass-card compact" onClick={() => openQuiz(q.id)} role="button" tabIndex={0}>
+            <div 
+              key={q.id} 
+              className="card glass-card compact cursor-pointer" 
+              onClick={() => openQuiz(q.id)}
+              role="button" 
+              tabIndex={"0"}
+              aria-label={`Deschide chestionar: ${q.nume || `Chestionar ${idx + 1}`}`}
+            >
               <div
                 className="badge"
                 role="status"
@@ -181,9 +188,11 @@ function Home() {
         {/* Special new quiz card last */}
         <div 
           className="card glass-card new-card" 
-          onClick={isCreating ? undefined : startNewAttempt} 
+          onClick={isCreating ? undefined : startNewAttempt}
           role="button" 
-          tabIndex={0}
+          tabIndex={isCreating ? "-1" : "0"}
+          aria-disabled={isCreating}
+          aria-label="Creează chestionar nou"
           style={{ opacity: isCreating ? 0.6 : 1, cursor: isCreating ? 'wait' : 'pointer' }}
         >
           <div className="new-icon" aria-hidden>

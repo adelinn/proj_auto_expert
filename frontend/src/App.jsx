@@ -50,6 +50,55 @@ function App() {
     }
   }, []);
 
+  // Global keyboard handler for Enter key on interactive elements
+  useEffect(() => {
+    function handleKeyDown(event) {
+      // Only handle Enter key
+      if (event.key !== 'Enter') return;
+
+      // Get the currently focused element
+      const activeElement = document.activeElement;
+
+      // Skip if focused element is an input, textarea, or contenteditable
+      if (
+        activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA' ||
+        activeElement.isContentEditable
+      ) {
+        return;
+      }
+
+      // Check if element has role="button" or is a button/link
+      const isInteractive =
+        activeElement.getAttribute('role') === 'button' ||
+        activeElement.tagName === 'BUTTON' ||
+        activeElement.tagName === 'A' ||
+        activeElement.onclick !== null;
+
+      // Check if element is not disabled
+      const isDisabled =
+        activeElement.hasAttribute('disabled') ||
+        activeElement.getAttribute('aria-disabled') === 'true';
+
+      if (isInteractive && !isDisabled) {
+        // Prevent default behavior
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Trigger click event
+        activeElement.click();
+      }
+    }
+
+    // Add event listener
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return (
     <Router>
       <AuthProvider>

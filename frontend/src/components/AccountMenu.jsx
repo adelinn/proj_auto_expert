@@ -23,7 +23,7 @@ export default function AccountMenu() {
     <Menu as="div" className="relative inline-block text-left">
       <MenuButton className="inline-flex items-center gap-2 rounded-md bg-white/5 backdrop-blur-md px-3 py-2 text-sm font-medium text-white/90 shadow-sm border border-white/10 hover:bg-white/6 focus:outline-none focus:ring-2 focus:ring-white/20">
         <UserIcon className="size-4 text-white/80" />
-        <span>My account</span>
+        <span className="max-md:hidden">My account</span>
       </MenuButton>
 
       <MenuItems className="absolute right-0 mt-2 w-56 origin-top-right rounded-lg bg-white/5 border border-white/5 shadow-lg p-2 focus:outline-none z-50">
