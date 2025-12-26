@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS `examene` (
 CREATE TABLE IF NOT EXISTS `intrebari` (
   `id_intrebare` int unsigned NOT NULL AUTO_INCREMENT,
   `text` varchar(255) NOT NULL,
+  `categorie` varchar(4) NOT NULL,
   `id_poza` int unsigned DEFAULT NULL,
   `tipQ_1xR` tinyint unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_intrebare`) USING BTREE

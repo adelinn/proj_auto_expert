@@ -71,18 +71,33 @@ export const getChestionare = async (req, res, next) => {
 export const createChestionar = async (req, res, next) => {
   const log = req?.log || logger;
   const userId = req.user.id;
+  const { categorie } = req.body; // Optional category filter
 
   try {
-    // Găsește primul test enabled care NU a fost făcut de user
-    const testDisponibil = await db('teste')
-      .select('*')
-      .where('enabled', 1)
-      .whereNotIn('id_test', function () {
+    // Build query for available tests
+    let query = db('teste')
+      .select('teste.*')
+      .where('teste.enabled', 1)
+      .whereNotIn('teste.id_test', function () {
         this.select('id_test')
           .from('examene')
           .where('id_user', userId);
-      })
-      .orderBy('id_test')
+      });
+
+    // Filter by category if provided
+    if (categorie) {
+      // Filter tests that have questions with the matching category
+      // Join through chestionare to intrebari to check the categorie field
+      query = query
+        .innerJoin('chestionare', 'teste.id_test', 'chestionare.id_test')
+        .innerJoin('intrebari', 'chestionare.id_intrebare', 'intrebari.id_intrebare')
+        .where('intrebari.categorie', categorie)
+        .groupBy('teste.id_test'); // Group by test to avoid duplicates
+    }
+
+    // Găsește primul test enabled care NU a fost făcut de user
+    const testDisponibil = await query
+      .orderBy('teste.id_test')
       .first();
 
     if (!testDisponibil) {

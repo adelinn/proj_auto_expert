@@ -13,7 +13,8 @@ const zTestPublic = z.object({
   timpLimitaS: zNonNegInt,
   enabled: zFlag01,
   versiune: zNonNegInt,
-  copyOf: zNullableId
+  copyOf: zNullableId,
+  categorie: zNonEmptyString.nullable().optional()
 });
 
 const zTestCreate = z.object({
@@ -23,7 +24,8 @@ const zTestCreate = z.object({
   timpLimitaS: zNonNegInt.optional().default(0),
   enabled: zFlag01.optional().default(1),
   versiune: zNonNegInt.optional().default(1),
-  copyOf: zNullableId.optional().default(null)
+  copyOf: zNullableId.optional().default(null),
+  categorie: zNonEmptyString.nullable().optional()
 });
 
 const zTestUpdate = z
@@ -34,7 +36,8 @@ const zTestUpdate = z
     timpLimitaS: zNonNegInt.optional(),
     enabled: zFlag01.optional(),
     versiune: zNonNegInt.optional(),
-    copyOf: zNullableId.optional()
+    copyOf: zNullableId.optional(),
+    categorie: zNonEmptyString.nullable().optional()
   })
   .refine((obj) => Object.keys(obj).length > 0, { message: "No changes provided" });
 
@@ -50,7 +53,8 @@ function toPublic(row) {
       timpLimitaS: row.timpLimitaS,
       enabled: row.enabled,
       versiune: row.versiune,
-      copyOf: row.copyOf
+      copyOf: row.copyOf,
+      categorie: row.categorie || null
     },
     "Invalid teste row"
   );
@@ -76,7 +80,8 @@ export async function create(data) {
     timpLimitaS: safe.timpLimitaS,
     enabled: safe.enabled,
     versiune: safe.versiune,
-    copyOf: safe.copyOf
+    copyOf: safe.copyOf,
+    categorie: safe.categorie || null
   };
   const [insertId] = await db(TABLE).insert(payload);
   return getById(insertId);
@@ -93,6 +98,7 @@ export async function update(id, changes) {
   if (safe.enabled !== undefined) payload.enabled = safe.enabled;
   if (safe.versiune !== undefined) payload.versiune = safe.versiune;
   if (safe.copyOf !== undefined) payload.copyOf = safe.copyOf;
+  if (safe.categorie !== undefined) payload.categorie = safe.categorie;
 
   await db(TABLE).where(PK, safeId).update(payload);
   return getById(safeId);

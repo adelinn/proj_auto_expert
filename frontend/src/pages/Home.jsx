@@ -89,12 +89,18 @@ function Home() {
         return;
       }
 
+      // Get selected category from localStorage
+      const category = localStorage.getItem('userCategory');
+
       const response = await fetch(`${API_BASE_URL}/chestionare`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          ...(category && { categorie: category })
+        }),
       });
 
       if (!response.ok) {
