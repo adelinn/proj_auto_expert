@@ -52,10 +52,6 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/questions', questionsRoutes);
 app.use('/api', questionnaireRoutes);
 
-// Admin routes (managing allowed domains etc)
-import adminRoutes from './routes/adminRoutes.js';
-app.use('/api/admin', adminRoutes);
-
 // 404 handler for undefined routes
 app.use((req, res) => {
   res.status(404).json({ 

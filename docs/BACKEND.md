@@ -45,9 +45,7 @@ backend/
 │   ├── questions.js       # Questions API routes
 │   └── ... .js            # Other routes
 ├── server/
-│   ├── logger.js          # Pino logger setup
-│   ├── allowedDomainsService.js
-│   └── urlValidator.js
+│   └── logger.js          # Pino logger setup
 ├── migrations/            # Database migrations
 ├── test/                  # Test scripts
 ├── Dockerfile             # Container image
