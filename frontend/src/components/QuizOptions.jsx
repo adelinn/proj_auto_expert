@@ -1,4 +1,4 @@
-import { Children, isValidElement, useMemo, useState, forwardRef, useImperativeHandle } from "react";
+import { Children, isValidElement, useMemo, useState, forwardRef, useImperativeHandle, useRef } from "react";
 import { cn } from "../utils/cn";
 import QuizOption from "./QuizOption";
 import QuizOptionInternal from "./QuizOptionInternal";
@@ -67,6 +67,12 @@ const QuizOptions = forwardRef(function QuizOptions({
       }
     },
     value: selected,
+    // Access isSelected state of individual options
+    getOptionIsSelected: (optionId) => {
+      return optionRefs.current[optionId]?.isSelected ?? false;
+    },
+    // Get all option refs
+    getOptionRefs: () => optionRefs.current,
   }), [selected, isControlled, onChange]);
 
   const selectedSet = useMemo(() => {
@@ -97,6 +103,9 @@ const QuizOptions = forwardRef(function QuizOptions({
     [children]
   );
 
+  // Store refs to all QuizOptionInternal components to access their isSelected state
+  const optionRefs = useRef({});
+
   return (
     <div
       className={cn(
@@ -115,6 +124,9 @@ const QuizOptions = forwardRef(function QuizOptions({
             <QuizOptionInternal
               // Use the child's own key if it has one; otherwise fall back to id.
               key={child.key ?? optionId}
+              ref={(el) => {
+                if (el) optionRefs.current[optionId] = el;
+              }}
               {...child.props}
               letter={indexToLetter(idx)}
               size={child.props?.size ?? size}

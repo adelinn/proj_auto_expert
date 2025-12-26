@@ -1,5 +1,5 @@
 import { Button as Btn } from "@headlessui/react";
-import { useState } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle, startTransition } from "react";
 import { cn } from "../utils/cn";
 
 /**
@@ -12,8 +12,12 @@ import { cn } from "../utils/cn";
  * @param {Function} onSelect - Action to be triggered when item is selected
  * @param {string} className - Additional Tailwind classes
  * @param {object} props - Other Headless UI Button props
+ * 
+ * Exposed via ref:
+ * - isSelected: boolean - Current selection state
+ * - getIsSelected(): boolean - Get current selection state
  */
-function QuizOption({
+const QuizOption = forwardRef(function QuizOption({
   children,
   letter = "A",
   size = "md",
@@ -22,8 +26,23 @@ function QuizOption({
   onSelect,
   className,
   ...props
-}) {
+}, ref) {
   let [isSelected, setIsSelected] = useState(typeof selected === "boolean" ? selected : false);
+
+  // Sync local state with the selected prop when it changes
+  useEffect(() => {
+    if (typeof selected === "boolean") {
+      startTransition(() => {
+        setIsSelected(selected);
+      });
+    }
+  }, [selected]);
+
+  // Expose isSelected state via ref
+  useImperativeHandle(ref, () => ({
+    isSelected,
+    getIsSelected: () => isSelected,
+  }), [isSelected]);
 
   function activate() {
     if (typeof onSelect === "function") onSelect();
@@ -85,6 +104,6 @@ function QuizOption({
       </div>
     </div>
   );
-}
+});
 
 export default QuizOption;

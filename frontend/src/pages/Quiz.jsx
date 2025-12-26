@@ -357,7 +357,8 @@ export default function Quiz() {
               size="md"
               imageSrc={currentQuestion.poza_url || ""}
               imageAlt="Întrebare"
-              multiple={currentQuestion.tip_multiplu}
+              // We default to true for now to be consistent with official tester behavior
+              multiple={true /*currentQuestion.tip_multiplu*/}
               value={
                 selectedAnswers[currentQuestion.id] ||
                 (currentQuestion.tip_multiplu ? [] : null)

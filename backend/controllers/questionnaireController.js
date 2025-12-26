@@ -252,12 +252,13 @@ export const answerQuestion = async (req, res, next) => {
       return res.status(404).json({ msg: 'Întrebarea nu a fost găsită' });
     }
 
-    // Validare: dacă e single choice (tipQ_1xR = 1), permitem doar 1 răspuns
-    if (intrebare.tipQ_1xR === 1 && raspunsuri.length > 1) {
-      return res.status(400).json({ 
-        msg: 'Această întrebare permite un singur răspuns' 
-      });
-    }
+    // Limitare dezactivata ca sa fim consistenti cu testerul de pe DRPCIV care are multiple la toate
+    // // Validare: dacă e single choice (tipQ_1xR = 1), permitem doar 1 răspuns
+    // if (intrebare.tipQ_1xR === 1 && raspunsuri.length > 1) {
+    //   return res.status(400).json({ 
+    //     msg: 'Această întrebare permite un singur răspuns' 
+    //   });
+    // }
 
     // Verifică că toate răspunsurile aparțin acestei întrebări
     const raspunsuriValide = await db('raspunsuriQ')
