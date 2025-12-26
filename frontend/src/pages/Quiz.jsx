@@ -6,6 +6,7 @@ import Spinner from "../components/Spinner";
 import Pin from "../components/Pin";
 import CircularProgress from "../components/CircularProgress";
 import { getToken } from "../utils/token";
+import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 
 const API_BASE_URL =
   import.meta?.env?.VITE_API_BASE_URL || "http://localhost:5000/api";
@@ -276,7 +277,7 @@ export default function Quiz() {
     totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
 
   return (
-    <section className="relative">
+    <section className="relative -mb-6">
       <div className="relative z-10 color-beige-100 p-2">
         {/* Header with progress */}
         <div className="mb-0 max-md:mb-2">
@@ -353,7 +354,7 @@ export default function Quiz() {
             </h2>
 
             <QuizOptions
-              size="lg"
+              size="md"
               imageSrc={currentQuestion.poza_url || ""}
               imageAlt="Întrebare"
               multiple={currentQuestion.tip_multiplu}
@@ -379,9 +380,9 @@ export default function Quiz() {
           <button
             onClick={goToPrevious}
             disabled={currentQuestionIndex === 0 || isSubmitting}
-            className="px-4 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white/90 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white/90 transition-colors"
           >
-            ← Anterior
+            <ArrowLeftIcon className="size-5"/><span className="max-md:hidden">Anterior</span>
           </button>
 
           <button
@@ -389,9 +390,9 @@ export default function Quiz() {
             disabled={
               currentQuestionIndex === totalQuestions - 1 || isSubmitting
             }
-            className="px-4 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white/90 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white/90 transition-colors"
           >
-            Următor →
+            <span className="max-md:hidden">Următor</span><ArrowRightIcon className="size-5"/>
           </button>
         </div>
 
@@ -403,7 +404,7 @@ export default function Quiz() {
           Înapoi la chestionare
         </button>
 
-        <div className="flex items-center gap-4 mt-1">
+        <div className="flex items-center gap-4 mt-2">
           <div className="text-xs text-white/60 flex-1">
             {answeredCount} din {totalQuestions} întrebări răspunse • Scor:{" "}
             {quizData.scor_curent || 0}

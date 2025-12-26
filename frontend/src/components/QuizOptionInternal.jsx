@@ -43,22 +43,22 @@ function QuizOption({
   };
   const textSizeClasses = {
     sm: "text-sm/6",
-    md: "text-base",
-    lg: "text-xl",
+    md: "text-base/6",
+    lg: "text-xl/6",
   };
 
   // Base classes
   const baseClassesButton =
     "inline-flex items-center gap-2 bg-beige-700/10 backdrop-blur-md font-semibold text-white shadow-inner shadow-white/10 border border-white/20 data-hover:bg-beige-600/15 data-open:bg-beige-700/15 focus:not-data-focus:outline-none data-focus:outline data-focus:outline-white";
   const baseClasses =
-    "w-full max-w-md rounded-xl bg-white/5 p-6 backdrop-blur-2xl duration-300 ease-out data-closed:transform-[scale(95%)] data-closed:opacity-0";
+    "w-full max-w-md rounded-xl bg-white/5 p-6 max-md:p-3 backdrop-blur-2xl duration-300 ease-out data-closed:transform-[scale(95%)] data-closed:opacity-0";
 
   // Combine all classes
   const cardClasses = cn(baseClasses, className);
   const buttonClasses = cn(baseClassesButton, textSizeVariantClasses[size], sizeVariantLetterClasses[size], borderRadius);
 
   return (
-    <div className="relative z-10" {...props}>
+    <div className="relative z-10 w-full max-w-md " {...props}>
       <div
         className={cn(cardClasses, "inline-flex items-center gap-4")}
       >
@@ -77,7 +77,7 @@ function QuizOption({
         <p
           className={cn(
             textSizeClasses[size],
-            "m-0 text-left leading-snug text-white/70"
+            "m-0 text-left text-white/70"
           )}
         >
           {children}
