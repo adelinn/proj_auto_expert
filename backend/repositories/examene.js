@@ -52,18 +52,18 @@ function toPublic(row) {
   );
 }
 
-export async function getAllExamene() {
+export async function getAll() {
   const rows = await db(TABLE).select('*');
   return rows.map(toPublic);
 }
 
-export async function getExamenById(id) {
+export async function getById(id) {
   const safeId = parseInput(zId, id, "Invalid examen id");
   const row = await db(TABLE).where(PK, safeId).first();
   return toPublic(row);
 }
 
-export async function createExamen(data) {
+export async function create(data) {
   const safe = parseInput(zExamenCreate, data, "Invalid examen create payload");
   const payload = {
     id_user: safe.id_user,
@@ -74,10 +74,10 @@ export async function createExamen(data) {
     durata: safe.durata
   };
   const [insertId] = await db(TABLE).insert(payload);
-  return getExamenById(insertId);
+  return getById(insertId);
 }
 
-export async function updateExamen(id, changes) {
+export async function update(id, changes) {
   const safeId = parseInput(zId, id, "Invalid examen id");
   const safe = parseInput(zExamenUpdate, changes, "Invalid examen update payload");
   const payload = {};
@@ -89,18 +89,26 @@ export async function updateExamen(id, changes) {
   if (safe.durata !== undefined) payload.durata = safe.durata;
 
   await db(TABLE).where(PK, safeId).update(payload);
-  return getExamenById(safeId);
+  return getById(safeId);
 }
 
-export function deleteExamen(id) {
+export function del(id) {
   const safeId = parseInput(zId, id, "Invalid examen id");
   return db(TABLE).where(PK, safeId).del();
 }
 
-export default {
-  getAll: getAllExamene,
-  getById: getExamenById,
-  create: createExamen,
-  update: updateExamen,
-  delete: deleteExamen
-};
+export async function getAllExamene(...args) {
+  return getAll(...args);
+}
+export async function getExamenById(...args) {
+  return getById(...args);
+}
+export async function createExamen(...args) {
+  return create(...args);
+}
+export async function updateExamen(...args) {
+  return update(...args);
+}
+export function deleteExamen(...args) {
+  return del(...args);
+}

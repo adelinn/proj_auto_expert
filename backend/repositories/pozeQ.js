@@ -29,44 +29,52 @@ function toPublic(row) {
   );
 }
 
-export async function getAllPoze() {
+export async function getAll() {
   const rows = await db(TABLE).select('*');
   return rows.map(toPublic);
 }
 
-export async function getPozaById(id) {
+export async function getById(id) {
   const safeId = parseInput(zId, id, "Invalid poza id");
   const row = await db(TABLE).where(PK, safeId).first();
   return toPublic(row);
 }
 
-export async function createPoza(data) {
+export async function create(data) {
   const safe = parseInput(zPozaCreate, data, "Invalid poza create payload");
   const payload = {
     uri: safe.uri
   };
   const [insertId] = await db(TABLE).insert(payload);
-  return getPozaById(insertId);
+  return getById(insertId);
 }
 
-export async function updatePoza(id, changes) {
+export async function update(id, changes) {
   const safeId = parseInput(zId, id, "Invalid poza id");
   const safe = parseInput(zPozaUpdate, changes, "Invalid poza update payload");
   const payload = {};
   if (safe.uri !== undefined) payload.uri = safe.uri;
   await db(TABLE).where(PK, safeId).update(payload);
-  return getPozaById(safeId);
+  return getById(safeId);
 }
 
-export function deletePoza(id) {
+export function del(id) {
   const safeId = parseInput(zId, id, "Invalid poza id");
   return db(TABLE).where(PK, safeId).del();
 }
 
-export default {
-  getAll: getAllPoze,
-  getById: getPozaById,
-  create: createPoza,
-  update: updatePoza,
-  delete: deletePoza
-};
+export async function getAllPoze(...args) {
+  return getAll(...args);
+}
+export async function getPozaById(...args) {
+  return getById(...args);
+}
+export async function createPoza(...args) {
+  return create(...args);
+}
+export async function updatePoza(...args) {
+  return update(...args);
+}
+export function deletePoza(...args) {
+  return del(...args);
+}

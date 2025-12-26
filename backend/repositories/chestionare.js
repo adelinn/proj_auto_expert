@@ -40,18 +40,18 @@ function toPublic(row) {
   );
 }
 
-export async function getAllChestionare() {
+export async function getAll() {
   const rows = await db(TABLE).select('*');
   return rows.map(toPublic);
 }
 
-export async function getChestionareById(id) {
+export async function getById(id) {
   const safeId = parseInput(zId, id, "Invalid chestionar id");
   const row = await db(TABLE).where(PK, safeId).first();
   return toPublic(row);
 }
 
-export async function createChestionare(data) {
+export async function create(data) {
   const safe = parseInput(zChestionarCreate, data, "Invalid chestionare create payload");
   const payload = {
     id_test: safe.id_test,
@@ -59,10 +59,10 @@ export async function createChestionare(data) {
     valoareQ: safe.valoareQ
   };
   const [insertId] = await db(TABLE).insert(payload);
-  return getChestionareById(insertId);
+  return getById(insertId);
 }
 
-export async function updateChestionare(id, changes) {
+export async function update(id, changes) {
   const safeId = parseInput(zId, id, "Invalid chestionare id");
   const safe = parseInput(zChestionarUpdate, changes, "Invalid chestionare update payload");
   const payload = {};
@@ -71,18 +71,26 @@ export async function updateChestionare(id, changes) {
   if (safe.valoareQ !== undefined) payload.valoareQ = safe.valoareQ;
 
   await db(TABLE).where(PK, safeId).update(payload);
-  return getChestionareById(safeId);
+  return getById(safeId);
 }
 
-export function deleteChestionare(id) {
+export function del(id) {
   const safeId = parseInput(zId, id, "Invalid chestionare id");
   return db(TABLE).where(PK, safeId).del();
 }
 
-export default {
-  getAll: getAllChestionare,
-  getById: getChestionareById,
-  create: createChestionare,
-  update: updateChestionare,
-  delete: deleteChestionare
-};
+export async function getAllChestionare(...args) {
+  return getAll(...args);
+}
+export async function getChestionareById(...args) {
+  return getById(...args);
+}
+export async function createChestionare(...args) {
+  return create(...args);
+}
+export async function updateChestionare(...args) {
+  return update(...args);
+}
+export function deleteChestionare(...args) {
+  return del(...args);
+}

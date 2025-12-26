@@ -40,18 +40,18 @@ function toPublic(row) {
   );
 }
 
-export async function getAllRaspunsuriQ() {
+export async function getAll() {
   const rows = await db(TABLE).select('*');
   return rows.map(toPublic);
 }
 
-export async function getRaspunsQById(id) {
+export async function getById(id) {
   const safeId = parseInput(zId, id, "Invalid raspunsQ id");
   const row = await db(TABLE).where(PK, safeId).first();
   return toPublic(row);
 }
 
-export async function createRaspunsQ(data) {
+export async function create(data) {
   const safe = parseInput(zRaspunsQCreate, data, "Invalid raspunsQ create payload");
   const payload = {
     id_intrebare: safe.id_intrebare,
@@ -59,10 +59,10 @@ export async function createRaspunsQ(data) {
     corect: safe.corect
   };
   const [insertId] = await db(TABLE).insert(payload);
-  return getRaspunsQById(insertId);
+  return getById(insertId);
 }
 
-export async function updateRaspunsQ(id, changes) {
+export async function update(id, changes) {
   const safeId = parseInput(zId, id, "Invalid raspunsQ id");
   const safe = parseInput(zRaspunsQUpdate, changes, "Invalid raspunsQ update payload");
   const payload = {};
@@ -70,18 +70,26 @@ export async function updateRaspunsQ(id, changes) {
   if (safe.text !== undefined) payload.text = safe.text;
   if (safe.corect !== undefined) payload.corect = safe.corect;
   await db(TABLE).where(PK, safeId).update(payload);
-  return getRaspunsQById(safeId);
+  return getById(safeId);
 }
 
-export function deleteRaspunsQ(id) {
+export function del(id) {
   const safeId = parseInput(zId, id, "Invalid raspunsQ id");
   return db(TABLE).where(PK, safeId).del();
 }
 
-export default {
-  getAll: getAllRaspunsuriQ,
-  getById: getRaspunsQById,
-  create: createRaspunsQ,
-  update: updateRaspunsQ,
-  delete: deleteRaspunsQ
-};
+export async function getAllRaspunsuriQ(...args) {
+  return getAll(...args);
+}
+export async function getRaspunsQById(...args) {
+  return getById(...args);
+}
+export async function createRaspunsQ(...args) {
+  return create(...args);
+}
+export async function updateRaspunsQ(...args) {
+  return update(...args);
+}
+export function deleteRaspunsQ(...args) {
+  return del(...args);
+}

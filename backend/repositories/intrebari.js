@@ -41,18 +41,18 @@ function toPublic(row) {
   );
 }
 
-export async function getAllIntrebari() {
+export async function getAll() {
   const rows = await db(TABLE).select('*');
   return rows.map(toPublic);
 }
 
-export async function getIntrebareById(id) {
+export async function getById(id) {
   const safeId = parseInput(zId, id, "Invalid intrebare id");
   const row = await db(TABLE).where(PK, safeId).first();
   return toPublic(row);
 }
 
-export async function createIntrebare(data) {
+export async function create(data) {
   // data: { text, id_poza, tipQ_1xR }
   const safe = parseInput(zIntrebareCreate, data, "Invalid intrebare create payload");
   const [insertId] = await db(TABLE).insert({
@@ -60,10 +60,10 @@ export async function createIntrebare(data) {
     id_poza: safe.id_poza,
     tipQ_1xR: safe.tipQ_1xR
   });
-  return getIntrebareById(insertId);
+  return getById(insertId);
 }
 
-export async function updateIntrebare(id, changes) {
+export async function update(id, changes) {
   const safeId = parseInput(zId, id, "Invalid intrebare id");
   const safe = parseInput(zIntrebareUpdate, changes, "Invalid intrebare update payload");
   const payload = {};
@@ -71,18 +71,26 @@ export async function updateIntrebare(id, changes) {
   if (safe.id_poza !== undefined) payload.id_poza = safe.id_poza;
   if (safe.tipQ_1xR !== undefined) payload.tipQ_1xR = safe.tipQ_1xR;
   await db(TABLE).where(PK, safeId).update(payload);
-  return getIntrebareById(safeId);
+  return getById(safeId);
 }
 
-export function deleteIntrebare(id) {
+export function del(id) {
   const safeId = parseInput(zId, id, "Invalid intrebare id");
   return db(TABLE).where(PK, safeId).del();
 }
 
-export default {
-  getAll: getAllIntrebari,
-  getById: getIntrebareById,
-  create: createIntrebare,
-  update: updateIntrebare,
-  delete: deleteIntrebare
-};
+export async function getAllIntrebari(...args) {
+  return getAll(...args);
+}
+export async function getIntrebareById(...args) {
+  return getById(...args);
+}
+export async function createIntrebare(...args) {
+  return create(...args);
+}
+export async function updateIntrebare(...args) {
+  return update(...args);
+}
+export function deleteIntrebare(...args) {
+  return del(...args);
+}

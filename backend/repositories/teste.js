@@ -56,18 +56,18 @@ function toPublic(row) {
   );
 }
 
-export async function getAllTeste() {
+export async function getAll() {
   const rows = await db(TABLE).select('*');
   return rows.map(toPublic);
 }
 
-export async function getTestById(id) {
+export async function getById(id) {
   const safeId = parseInput(zId, id, "Invalid test id");
   const row = await db(TABLE).where(PK, safeId).first();
   return toPublic(row);
 }
 
-export async function createTest(data) {
+export async function create(data) {
   const safe = parseInput(zTestCreate, data, "Invalid test create payload");
   const payload = {
     nume: safe.nume,
@@ -79,10 +79,10 @@ export async function createTest(data) {
     copyOf: safe.copyOf
   };
   const [insertId] = await db(TABLE).insert(payload);
-  return getTestById(insertId);
+  return getById(insertId);
 }
 
-export async function updateTest(id, changes) {
+export async function update(id, changes) {
   const safeId = parseInput(zId, id, "Invalid test id");
   const safe = parseInput(zTestUpdate, changes, "Invalid test update payload");
   const payload = {};
@@ -95,18 +95,26 @@ export async function updateTest(id, changes) {
   if (safe.copyOf !== undefined) payload.copyOf = safe.copyOf;
 
   await db(TABLE).where(PK, safeId).update(payload);
-  return getTestById(safeId);
+  return getById(safeId);
 }
 
-export function deleteTest(id) {
+export function del(id) {
   const safeId = parseInput(zId, id, "Invalid test id");
   return db(TABLE).where(PK, safeId).del();
 }
 
-export default {
-  getAll: getAllTeste,
-  getById: getTestById,
-  create: createTest,
-  update: updateTest,
-  delete: deleteTest
-};
+export async function getAllTeste(...args) {
+  return getAll(...args);
+}
+export async function getTestById(...args) {
+  return getById(...args);
+}
+export async function createTest(...args) {
+  return create(...args);
+}
+export async function updateTest(...args) {
+  return update(...args);
+}
+export function deleteTest(...args) {
+  return del(...args);
+}

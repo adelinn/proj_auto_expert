@@ -126,6 +126,6 @@ export async function createUser(...args) {
 export async function updateUser(...args) {
   return update(...args);
 }
-export function deleteUser() {
-  return del();
+export function deleteUser(...args) {
+  return del(...args);
 }

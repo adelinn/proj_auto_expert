@@ -40,18 +40,18 @@ function toPublic(row) {
   );
 }
 
-export async function getAllRaspunsuriXam() {
+export async function getAll() {
   const rows = await db(TABLE).select('*');
   return rows.map(toPublic);
 }
 
-export async function getRaspunsXamById(id) {
+export async function getById(id) {
   const safeId = parseInput(zId, id, "Invalid raspunsXam id");
   const row = await db(TABLE).where(PK, safeId).first();
   return toPublic(row);
 }
 
-export async function createRaspunsXam(data) {
+export async function create(data) {
   const safe = parseInput(zRaspunsXamCreate, data, "Invalid raspunsXam create payload");
   const payload = {
     id_examen: safe.id_examen,
@@ -59,10 +59,10 @@ export async function createRaspunsXam(data) {
     valoare: safe.valoare
   };
   const [insertId] = await db(TABLE).insert(payload);
-  return getRaspunsXamById(insertId);
+  return getById(insertId);
 }
 
-export async function updateRaspunsXam(id, changes) {
+export async function update(id, changes) {
   const safeId = parseInput(zId, id, "Invalid raspunsXam id");
   const safe = parseInput(zRaspunsXamUpdate, changes, "Invalid raspunsXam update payload");
   const payload = {};
@@ -70,18 +70,26 @@ export async function updateRaspunsXam(id, changes) {
   if (safe.id_raspunsQ !== undefined) payload.id_raspunsQ = safe.id_raspunsQ;
   if (safe.valoare !== undefined) payload.valoare = safe.valoare;
   await db(TABLE).where(PK, safeId).update(payload);
-  return getRaspunsXamById(safeId);
+  return getById(safeId);
 }
 
-export function deleteRaspunsXam(id) {
+export function del(id) {
   const safeId = parseInput(zId, id, "Invalid raspunsXam id");
   return db(TABLE).where(PK, safeId).del();
 }
 
-export default {
-  getAll: getAllRaspunsuriXam,
-  getById: getRaspunsXamById,
-  create: createRaspunsXam,
-  update: updateRaspunsXam,
-  delete: deleteRaspunsXam
-};
+export async function getAllRaspunsuriXam(...args) {
+  return getAll(...args);
+}
+export async function getRaspunsXamById(...args) {
+  return getById(...args);
+}
+export async function createRaspunsXam(...args) {
+  return create(...args);
+}
+export async function updateRaspunsXam(...args) {
+  return update(...args);
+}
+export function deleteRaspunsXam(...args) {
+  return del(...args);
+}
