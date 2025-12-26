@@ -6,7 +6,7 @@ import Spinner from "../components/Spinner";
 import Pin from "../components/Pin";
 import CircularProgress from "../components/CircularProgress";
 import { getToken } from "../utils/token";
-import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
+import { ArrowUturnRightIcon, CheckCircleIcon, XCircleIcon } from "@heroicons/react/16/solid";
 
 const API_BASE_URL =
   import.meta?.env?.VITE_API_BASE_URL || "http://localhost:5000/api";
@@ -167,9 +167,6 @@ export default function Quiz() {
       ...prev,
       [intrebareId]: Array.isArray(answerIds) ? answerIds : [answerIds],
     }));
-
-    // Auto-submit answer
-    handleSubmitAnswer(intrebareId, answerIds);
   }
 
   // Scroll to center the current question's pin
@@ -202,12 +199,6 @@ export default function Quiz() {
   function goToNext() {
     if (quizData && currentQuestionIndex < quizData.intrebari.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
-    }
-  }
-
-  function goToPrevious() {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1);
     }
   }
 
@@ -408,24 +399,51 @@ export default function Quiz() {
           </div>
         )}
 
-        {/* Navigation buttons */}
-        <div className="flex items-center justify-between gap-4 mb-6">
+        {/* Action buttons */}
+        <div className="flex justify-center gap-4 mt-6 pb-4">
           <button
-            onClick={goToPrevious}
-            disabled={currentQuestionIndex === 0 || isSubmitting}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white/90 transition-colors"
+            onClick={() => {
+              // Answer later - just move to next question
+              goToNext();
+            }}
+            disabled={currentQuestionIndex === totalQuestions - 1 || isSubmitting}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white/90 transition-colors"
           >
-            <ArrowLeftIcon className="size-5"/><span className="max-md:hidden">Anterior</span>
+            <ArrowUturnRightIcon className="size-5"/><span className="max-md:text-xs">Răspunde mai târziu</span>
           </button>
-
+          
           <button
-            onClick={goToNext}
-            disabled={
-              currentQuestionIndex === totalQuestions - 1 || isSubmitting
-            }
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white/90 transition-colors"
+            onClick={() => {
+              // Modify answer - clear current selection and allow re-selection
+              if (currentQuestion) {
+                setSelectedAnswers((prev) => {
+                  const updated = { ...prev };
+                  delete updated[currentQuestion.id];
+                  return updated;
+                });
+              }
+            }}
+            disabled={!selectedAnswers[currentQuestion?.id] || isSubmitting}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-racingred-700/60 hover:bg-racingred-700/80 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white/90 transition-colors"
           >
-            <span className="max-md:hidden">Următor</span><ArrowRightIcon className="size-5"/>
+            <XCircleIcon className="size-5"/><span className="max-md:hidden">Modifică răspunsul</span>
+          </button>
+          
+          <button
+            onClick={() => {
+              // Submit answer - same as auto-submit but explicit
+              if (currentQuestion && selectedAnswers[currentQuestion.id]) {
+                handleSubmitAnswer(
+                  currentQuestion.id,
+                  selectedAnswers[currentQuestion.id]
+                );
+                goToNext();
+              }
+            }}
+            disabled={!selectedAnswers[currentQuestion?.id] || isSubmitting}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 hover:from-blue-600 hover:via-cyan-600 hover:to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-semibold transition-all shadow-lg shadow-blue-500/20"
+          >
+            <CheckCircleIcon className="size-5"/><span className="max-md:hidden">Trimite răspunsul</span>
           </button>
         </div>
 
