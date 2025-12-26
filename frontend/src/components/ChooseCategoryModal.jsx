@@ -1,6 +1,5 @@
 import { Dialog } from "@headlessui/react";
 import { useState, useEffect, useRef, startTransition } from "react";
-import { useNavigate } from "react-router-dom";
 
 const CATEGORIES = [
   { key: "A", emoji: "🏍️", title: "Categoria A", subs: ["AM", "A1", "A2", "A"] },
@@ -12,7 +11,6 @@ const CATEGORIES = [
 
 export default function ChooseCategoryModal({ open, onClose }) {
   const [selected, setSelected] = useState(null);
-  const navigate = useNavigate();
   const prevOpenRef = useRef(open);
 
   // Reset selection when modal opens (transitions from closed to open)
