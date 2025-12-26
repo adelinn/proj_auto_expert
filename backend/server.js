@@ -3,7 +3,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import authRoutes from './routes/authRoutes.js';
-import projectRoutes from './routes/projectRoutes.js';
 import questionsRoutes from './routes/questions.js';
 import questionnaireRoutes from './routes/questionnaireRoutes.js';
 import { migrateLatest, destroyDb } from './config/db.js';
@@ -48,7 +47,6 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/projects', projectRoutes);
 app.use('/api/questions', questionsRoutes);
 app.use('/api', questionnaireRoutes);
 
