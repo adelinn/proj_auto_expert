@@ -4,8 +4,10 @@ import { getToken } from '../utils/token';
 import Spinner from '../components/Spinner';
 import ChooseCategoryModal from '../components/ChooseCategoryModal';
 import CircularProgress from "../components/CircularProgress";
+import GlassCard from '../components/GlassCard';
 import './Home.css';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/16/solid';
 
 const API_BASE_URL = import.meta?.env?.VITE_API_BASE_URL || "http://localhost:5000/api";
 
@@ -166,7 +168,7 @@ function Home() {
         <p className="page-subtitle">Selectează un test pentru a începe sau continua</p>
       </header>
 
-      <div className="grid">
+      <div className="grid grid-cols-[repeat(auto-fill,_minmax(220px,_1fr))] max-md:grid-cols-2 gap-2">
         {quizzes.map((q, idx) => {
           // Use backend data for progress
           const completed = q.nr_raspunse || 0;
@@ -177,48 +179,54 @@ function Home() {
           const ctaLabel = completed > 0 ? 'Continuă' : 'Începe';
 
           return (
-            <div 
-              key={q.id} 
-              className="card glass-card compact cursor-pointer" 
+            <GlassCard
+              key={q.id}
+              variant="compact"
               onClick={() => openQuiz(q.id)}
-              role="button" 
-              tabIndex={"0"}
+              role="button"
+              tabIndex="0"
               aria-label={`Deschide chestionar: ${q.nume || `Chestionar ${idx + 1}`}`}
             >
-              <div
-                className="badge"
-                role="status"
-                aria-label={`${completed} din ${totalQuestions} întrebări, ${percent}% completat`}
-              >
-                <CircularProgress progress={totalQuestions > 0 ? Math.round((completed / totalQuestions) * 100) : 0} size="xs" />
-                <div className="badge-text">
-                  <div className="badge-count">{completed}/{totalQuestions}</div>
-                  <div className="badge-percent">{percent}%</div>
+              <h3 className="text-base font-semibold">{q.nume || `Chestionar ${idx + 1}`}</h3>
+              
+              <div className="mt-2.5 inline-flex justify-center max-md:flex-wrap gap-2">
+                <div
+                  className="text-sm inline-flex items-center gap-2 mr-1 min-w-[58px]"
+                  role="status"
+                  aria-label={`${completed} din ${totalQuestions} întrebări, ${percent}% completat`}
+                >
+                  <CircularProgress progress={totalQuestions > 0 ? Math.round((completed / totalQuestions) * 100) : 0} size="sm" > </CircularProgress>
+                  <div className="flex flex-col items-start">
+                    <div>{completed}/{totalQuestions}</div>
+                    <div className="font-bold text-[#bff3f6]">{percent}%</div>
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <div className="flex flex-row items-center justify-center"><CheckCircleIcon className="size-4 mr-0.5"/>{correct}</div>
+                    <div className="font-bold flex flex-row items-center justify-center"><XCircleIcon className="size-4 mr-0.5"/>{wrong}</div>
+                  </div>
+                </div>
+                <div className="flex-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 text-white font-bold py-1.5 px-2.5 rounded-[10px] shadow-[0_8px_24px_rgba(2,6,23,0.32)] text-sm">
+                  {ctaLabel}
                 </div>
               </div>
-
-              <h3 className="card-title">{q.nume || `Chestionar ${idx + 1}`}</h3>
-              <div className="card-score">✅ {correct} &nbsp; ❌ {wrong}</div>
-              <div className="cta"><div className="btn-primary small">{ctaLabel}</div></div>
-            </div>
+            </GlassCard>
           );
         })}
 
         {/* Special new quiz card last */}
-        <div 
-          className="card glass-card new-card" 
+        <GlassCard
           onClick={isCreating ? undefined : startNewAttempt}
-          role="button" 
+          role="button"
           tabIndex={isCreating ? "-1" : "0"}
           aria-disabled={isCreating}
           aria-label="Creează chestionar nou"
-          style={{ opacity: isCreating ? 0.6 : 1, cursor: isCreating ? 'wait' : 'pointer' }}
+          className={isCreating ? "opacity-60 cursor-wait" : ""}
         >
-          <div className="new-icon" aria-hidden>
+          <div className="text-2xl bg-emerald-500/8 text-emerald-500 w-16 h-16 inline-flex items-center justify-center rounded-lg" aria-hidden>
             {isCreating ? <Spinner size="md" /> : <PlusIcon className='size-12'/>}
           </div>
-          <div className="meta">Începe un test nou din această categorie</div>
-        </div>
+          <div className="text-sm text-white/70">Începe un test nou din această categorie</div>
+        </GlassCard>
       </div>
     </div>
   );

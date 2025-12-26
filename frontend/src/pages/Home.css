@@ -1,5 +1,5 @@
 .home-page {
-  padding: 2rem;
+  padding: 1rem;
 }
 
 .home-header {
@@ -12,12 +12,6 @@
 
 .home-header .sub {
   margin: 0;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
 }
 
 /* Cards rely on global .glass-card for visual styling, keep only layout and position */
