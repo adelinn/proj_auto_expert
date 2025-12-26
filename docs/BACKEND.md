@@ -11,7 +11,7 @@ The backend is an Express.js REST API built with Node.js, using MySQL database w
 - **MySQL** - Database (via Cloud SQL)
 - **Knex.js** - SQL query builder
 - **JWT (jsonwebtoken)** - Authentication tokens
-- **bcrypt/bcryptjs** - Password hashing
+- **bcrypt** - Password hashing
 - **Zod** - Schema validation
 - **Pino** - Structured logging
 - **Helmet** - Security headers
