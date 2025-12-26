@@ -1,4 +1,4 @@
-import { Children, isValidElement, useMemo, useState } from "react";
+import { Children, isValidElement, useMemo, useState, forwardRef, useImperativeHandle } from "react";
 import { cn } from "../utils/cn";
 import QuizOption from "./QuizOption";
 import QuizOptionInternal from "./QuizOptionInternal";
@@ -26,8 +26,13 @@ function indexToLetter(i) {
  * - className?: string
  * - optionsClassName?: string
  * - optionClassName?: string
+ * 
+ * Exposed via ref:
+ * - getValue(): string | string[] | null - Get current selected value(s)
+ * - setValue(value: string | string[]): void - Set selected value(s) programmatically
+ * - value: string | string[] | null - Direct access to current value
  */
-function QuizOptions({
+const QuizOptions = forwardRef(function QuizOptions({
   children,
   multiple = false,
   value,
@@ -41,7 +46,7 @@ function QuizOptions({
   className,
   optionsClassName,
   optionClassName,
-}) {
+}, ref) {
   const isControlled = value !== undefined;
   const [internalValue, setInternalValue] = useState(() => {
     if (defaultValue !== undefined) return defaultValue;
@@ -50,25 +55,37 @@ function QuizOptions({
 
   const selected = isControlled ? value : internalValue;
 
+  // Expose internal value and methods via ref
+  useImperativeHandle(ref, () => ({
+    getValue: () => selected,
+    setValue: (newValue) => {
+      if (!isControlled) {
+        setInternalValue(newValue);
+      }
+      if (typeof onChange === "function") {
+        onChange(newValue);
+      }
+    },
+    value: selected,
+  }), [selected, isControlled, onChange]);
+
   const selectedSet = useMemo(() => {
-    if (multiple) return new Set(Array.isArray(selected) ? selected : []);
-    return new Set(selected ? [selected] : []);
-  }, [multiple, selected]);
+    return new Set(Array.isArray(selected) ? selected : []);
+  }, [selected]);
 
   function commit(next) {
     if (!isControlled) setInternalValue(next);
     if (typeof onChange === "function") onChange(next);
   }
 
-  function toggle(id) {
+  function setAsSelected(id) {
     if (multiple) {
       const nextSet = new Set(selectedSet);
-      if (nextSet.has(id)) nextSet.delete(id);
-      else nextSet.add(id);
+      nextSet.add(id);
       commit(Array.from(nextSet));
       return;
     }
-    commit(id);
+    commit([id]);
   }
 
   const showImage = Boolean(imageSrc);
@@ -103,7 +120,7 @@ function QuizOptions({
               size={child.props?.size ?? size}
               selected={selectedSet.has(optionId)}
               onSelect={() => {
-                toggle(optionId);
+                setAsSelected(optionId);
                 if (typeof childOnSelect === "function") childOnSelect();
               }}
               className={cn(child.props?.className, optionClassName)}
@@ -128,8 +145,6 @@ function QuizOptions({
       )}
     </div>
   );
-}
+});
 
 export default QuizOptions;
-
-
