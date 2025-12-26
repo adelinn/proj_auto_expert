@@ -276,6 +276,28 @@ export default function Quiz() {
   const progress =
     totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
 
+  // Helper function to check if an answer is correct
+  function isAnswerCorrect(intrebare) {
+    if (!intrebare.raspunsuri_date || intrebare.raspunsuri_date.length === 0) {
+      return null; // Not answered
+    }
+
+    // Get correct answer IDs from variants
+    const correctAnswerIds = intrebare.variante
+      .filter(v => v.corect === 1)
+      .map(v => v.id);
+
+    // Get selected answer IDs
+    const selectedIds = intrebare.raspunsuri_date;
+
+    // Check if all selected are correct and all correct are selected
+    const allSelectedAreCorrect = selectedIds.every(id => correctAnswerIds.includes(id));
+    const allCorrectAreSelected = correctAnswerIds.every(id => selectedIds.includes(id));
+    const correctCount = selectedIds.length === correctAnswerIds.length;
+
+    return allSelectedAreCorrect && allCorrectAreSelected && correctCount;
+  }
+
   return (
     <section className="relative -mb-6">
       <div className="relative z-10 color-beige-100 p-2">
@@ -293,27 +315,37 @@ export default function Quiz() {
               <div className="inline-flex items-center gap-2 select-none justify-center">
                 <span className="size-4 text-white/70">&nbsp;</span>
               </div>
-              {quizData.intrebari.map((_, index) => (
-                <Pin
-                  key={index}
-                  ref={(el) => {
-                    if (el) pinRefs.current[index] = el;
-                  }}
-                  tabIndex={isSubmitting ? "-1" : "0"}
-                  onClick={() => !isSubmitting && goToQuestion(index)}
-                  aria-disabled={isSubmitting}
-                  className={`transition-colors flex-shrink-0 snap-center ${
-                    index === currentQuestionIndex
-                      ? "bg-blue-500 text-white"
-                      : selectedAnswers[quizData.intrebari[index].id]
-                      ? "bg-green-500/50 text-white"
-                      : "bg-white/10 hover:bg-white/20 text-white/70"
-                  }`}
-                  title={`Întrebarea ${index + 1}`}
-                >
-                  {index + 1}
-                </Pin>
-              ))}
+              {quizData.intrebari.map((_, index) => {
+                const intrebare = quizData.intrebari[index];
+                const isAnswered = selectedAnswers[intrebare.id];
+                const answerCorrect = isAnswerCorrect(intrebare);
+                
+                let pinColorClass = "bg-white/10 hover:bg-white/20 text-white/70";
+                if (index === currentQuestionIndex) {
+                  pinColorClass = "bg-blue-500 text-white";
+                } else if (isAnswered) {
+                  // Show red for wrong answers, green for correct answers
+                  pinColorClass = answerCorrect 
+                    ? "bg-junglegreen-500/50 text-white" 
+                    : "bg-racingred-500/50 text-white";
+                }
+
+                return (
+                  <Pin
+                    key={index}
+                    ref={(el) => {
+                      if (el) pinRefs.current[index] = el;
+                    }}
+                    tabIndex={isSubmitting ? "-1" : "0"}
+                    onClick={() => !isSubmitting && goToQuestion(index)}
+                    aria-disabled={isSubmitting}
+                    className={`transition-colors flex-shrink-0 snap-center ${pinColorClass}`}
+                    title={`Întrebarea ${index + 1}`}
+                  >
+                    {index + 1}
+                  </Pin>
+                );
+              })}
               <div className="inline-flex items-center gap-2 select-none justify-center">
                 <span className="size-4 text-white/70">&nbsp;</span>
               </div>

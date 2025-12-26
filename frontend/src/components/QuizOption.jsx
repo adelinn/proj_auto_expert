@@ -8,6 +8,10 @@
  * @param {Function} onSelect - Action to be triggered when item is selected
  * @param {string} className - Additional Tailwind classes
  * @param {object} props - Other Headless UI Button props
+ * 
+ * Exposed via ref:
+ * - isSelected: boolean - Current selection state
+ * - getIsSelected(): boolean - Get current selection state
  */
 function QuizOption() {
   return (
