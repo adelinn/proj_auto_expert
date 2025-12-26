@@ -1,17 +1,34 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getToken } from '../utils/token';
 import Spinner from '../components/Spinner';
+import ChooseCategoryModal from '../components/ChooseCategoryModal';
+import CircularProgress from "../components/CircularProgress";
 import './Home.css';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 const API_BASE_URL = import.meta?.env?.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [quizzes, setQuizzes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
+  // Check if category is needed on mount or when redirected
+  useEffect(() => {
+    const category = localStorage.getItem('userCategory');
+    const shouldOpenModal = 
+      !category || 
+      (location.state && location.state.openCategory);
+    
+    if (shouldOpenModal) {
+      setIsCategoryModalOpen(true);
+    }
+  }, [location]);
 
   // Fetch quizzes from backend
   useEffect(() => {
@@ -139,6 +156,11 @@ function Home() {
 
   return (
     <div className="home-page">
+      <ChooseCategoryModal 
+        open={isCategoryModalOpen} 
+        onClose={() => setIsCategoryModalOpen(false)} 
+      />
+      
       <header className="home-header">
         <h1 className="page-title">Chestionare</h1>
         <p className="page-subtitle">Selectează un test pentru a începe sau continua</p>
@@ -168,10 +190,7 @@ function Home() {
                 role="status"
                 aria-label={`${completed} din ${totalQuestions} întrebări, ${percent}% completat`}
               >
-                <svg className="badge-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M12 2a10 10 0 1 0 10 10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M12 12V6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <CircularProgress progress={totalQuestions > 0 ? Math.round((completed / totalQuestions) * 100) : 0} size="xs" />
                 <div className="badge-text">
                   <div className="badge-count">{completed}/{totalQuestions}</div>
                   <div className="badge-percent">{percent}%</div>
@@ -196,13 +215,9 @@ function Home() {
           style={{ opacity: isCreating ? 0.6 : 1, cursor: isCreating ? 'wait' : 'pointer' }}
         >
           <div className="new-icon" aria-hidden>
-            {isCreating ? <Spinner size="sm" /> : '➕'}
+            {isCreating ? <Spinner size="md" /> : <PlusIcon className='size-12'/>}
           </div>
-          <h3 className="card-title">Chestionar nou</h3>
           <div className="meta">Începe un test nou din această categorie</div>
-          <div className="cta">
-            <div className="btn-primary small">{isCreating ? 'Se creează...' : 'Începe'}</div>
-          </div>
         </div>
       </div>
     </div>

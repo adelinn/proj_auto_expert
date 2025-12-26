@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Button from "../components/Button";
-import ChooseCategoryModal from "../components/ChooseCategoryModal";
 import { setToken } from '../utils/token';
 import "./LoginSignup.css";
 
@@ -28,15 +27,6 @@ export default function LoginSignup({ initialMode = "login" }) {
   const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    if (location && location.state && location.state.openCategory) {
-      // if we were redirected here to pick a category, ensure signup mode and open modal
-      setIsLogin(false);
-      setIsCategoryModalOpen(true);
-    }
-  }, [location]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -46,8 +36,6 @@ export default function LoginSignup({ initialMode = "login" }) {
       [name]: newValue,
     }));
   };
-
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   const handleSubmit = async (e) => {
     // Login submit
@@ -134,7 +122,6 @@ export default function LoginSignup({ initialMode = "login" }) {
       console.error(err);
     } finally {
       setIsSubmitting(false);
-      setIsCategoryModalOpen(true);
     }
   };
 
@@ -288,11 +275,6 @@ export default function LoginSignup({ initialMode = "login" }) {
           )}
         </div>
       </div>
-
-      <ChooseCategoryModal
-        open={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
-      />
     </div>
   );
 }

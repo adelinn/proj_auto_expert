@@ -19,10 +19,10 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  const category = localStorage.getItem("userCategory");
-  if (!category) {
-    return <Navigate to="/signup" replace state={{ openCategory: true }} />;
-  }
+  // const category = localStorage.getItem("userCategory");
+  // if (!category) {
+  //   return <Navigate to="/home" replace state={{ openCategory: true }} />;
+  // }
 
   return children;
 }

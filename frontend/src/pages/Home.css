@@ -42,7 +42,6 @@
 }
 
 .new-card {
-  border: 1px dashed rgba(255,255,255,0.06);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -56,8 +55,8 @@
   font-size: 1.6rem;
   background: rgba(16,185,129,0.08);
   color: #10b981;
-  width: 36px;
-  height: 36px;
+  width: 4rem;
+  height: 4rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;

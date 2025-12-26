@@ -16,12 +16,18 @@ export default function CircularProgress({
   const gradientId = useId();
   // Size variants
   const sizeConfig = {
+    xs: {
+      svg: 20,
+      center: 10,
+      radius: 7,
+      strokeWidth: 3
+    },
     sm: {
       svg: 32,
       center: 16,
       radius: 12,
       strokeWidth: 4,
-      textSize: 'text-[10px]'
+      textSize: 'text-[0.5rem]'
     },
     md: {
       svg: 48,
@@ -84,6 +90,8 @@ export default function CircularProgress({
       <div className="absolute inset-0 flex items-center justify-center">
         {children !== undefined ? (
           children
+        ) : size === "xs" ? (
+          <></>
         ) : (
           <span className={`${config.textSize} font-semibold text-white/90`}>
             {Math.round(progress)}%

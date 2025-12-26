@@ -34,7 +34,6 @@ export default function ChooseCategoryModal({ open, onClose }) {
     localStorage.setItem("userCategory", selected);
     setSelected(null); // Reset state before closing
     onClose?.();
-    navigate("/home");
   }
 
   // Prevent closing the dialog via overlay/Esc by ignoring onClose events
