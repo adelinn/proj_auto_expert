@@ -91,7 +91,7 @@ function QuizOptions({
       <div className={cn("flex flex-col items-center gap-4", optionsClassName)}>
         {optionChildren.map((child, idx) => {
           const optionId =
-            child.props?.id ?? child.props?.value ?? `option-${idx}`;
+            child.props?.id ?? child.props?.value ?? child.props?.["option-id"] ?? `option-${idx}`;
           const childOnSelect = child.props?.onSelect;
 
           return (

@@ -367,7 +367,7 @@ export default function Quiz() {
               }
             >
               {currentQuestion.variante.map((varianta) => (
-                <QuizOption key={varianta.id} id={varianta.id.toString()}>
+                <QuizOption key={varianta.id} option-id={varianta.id}>
                   {varianta.text}
                 </QuizOption>
               ))}
