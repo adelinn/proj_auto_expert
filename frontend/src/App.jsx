@@ -6,7 +6,7 @@ import {
   Link,
   useLocation,
 } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import Navigation from "./components/Navigation";
 import Home from "./pages/Home";
 import "./App.css";
@@ -30,13 +30,47 @@ function AnalyticsTracker() {
       // Load Firebase Analytics if not already loaded, then track page view
       loadFirebaseAnalytics().then((loaded) => {
         if (loaded) {
-          // Small delay to ensure analytics is ready
+          // Small delay to ensure analytics is ready and title is set
           setTimeout(() => {
-            trackPageView(location.pathname + location.search);
+            // Read the current document title to ensure it's up to date
+            const currentTitle = document.title;
+            trackPageView(location.pathname + location.search, currentTitle);
           }, 100);
         }
       });
     }
+  }, [location]);
+
+  return null;
+}
+
+// Component to update document title based on route
+function TitleUpdater() {
+  const location = useLocation();
+
+  // Use useLayoutEffect to ensure title is set synchronously before analytics tracking
+  useLayoutEffect(() => {
+    const baseTitle = "auto-expert";
+    let pageTitle = baseTitle;
+
+    // Map routes to page titles
+    if (location.pathname === "/login") {
+      pageTitle = `Autentificare`;
+    } else if (location.pathname === "/signup") {
+      pageTitle = `Înregistrare`;
+    } else if (location.pathname === "/privacy-policy") {
+      pageTitle = `Politica de Confidențialitate`;
+    } else if (location.pathname === "/home") {
+      pageTitle = `Chestionare`;
+    } else if (location.pathname.startsWith("/quiz/")) {
+      // For quiz pages, the title will be updated by the Quiz component
+      // when quiz data loads, so we'll use a default here
+      pageTitle = `Chestionar`;
+    } else {
+      pageTitle = baseTitle;
+    }
+
+    document.title = pageTitle;
   }, [location]);
 
   return null;
@@ -102,6 +136,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        <TitleUpdater />
         <AnalyticsTracker />
         <NeonBlobsBackground />
         <Navigation />
