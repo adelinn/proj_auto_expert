@@ -117,7 +117,7 @@ const QuizOptions = forwardRef(function QuizOptions({
       {showImage && (
         <div className="flex justify-center md:justify-end order-1 md:order-2">
           <img
-            src={imageSrc}
+            src={`/${imageSrc}`}
             alt={imageAlt}
             className={cn(
               "max-w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl shadow-black/30",
