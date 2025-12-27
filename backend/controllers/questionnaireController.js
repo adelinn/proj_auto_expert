@@ -285,6 +285,22 @@ export const answerQuestion = async (req, res, next) => {
       return res.status(400).json({ msg: 'Răspunsuri invalide' });
     }
 
+    // IMPORTANT: Găsește TOATE răspunsurile corecte pentru această întrebare
+    const toateRaspunsuriCorecte = await db('raspunsuriQ')
+      .select('id_raspunsQ')
+      .where('id_intrebare', intrebareId)
+      .where('corect', 1);
+
+    const idsCorecte = toateRaspunsuriCorecte.map(r => r.id_raspunsQ).sort();
+    const idsSelectate = [...raspunsuri].sort();
+
+    // Verifică dacă răspunsul e corect:
+    // 1. Toate răspunsurile selectate trebuie să fie corecte
+    // 2. Numărul de răspunsuri selectate trebuie să fie egal cu numărul de răspunsuri corecte
+    // 3. ID-urile trebuie să fie identice
+    const eCorect = idsCorecte.length === idsSelectate.length &&
+                    idsCorecte.every((id, index) => id === idsSelectate[index]);
+
     // TRANSACȚIE: șterge răspunsuri vechi + inserează noi + update scor
     await db.transaction(async (trx) => {
       // 1. Șterge răspunsurile vechi pentru această întrebare
@@ -313,25 +329,47 @@ export const answerQuestion = async (req, res, next) => {
       }
 
       // 4. Recalculează scorul total
-      const scorQuery = await trx('raspunsuriXam')
-        .count('* as nr_corecte')
-        .leftJoin('raspunsuriQ', 'raspunsuriXam.id_raspunsQ', 'raspunsuriQ.id_raspunsQ')
-        .where('raspunsuriXam.id_examen', examenId)
-        .where('raspunsuriXam.valoare', 1)
-        .where('raspunsuriQ.corect', 1)
-        .first();
+      // Numără întrebările la care userul a răspuns COMPLET CORECT
+      
+      // Găsește toate întrebările din test
+      const intrebariTest = await trx('chestionare')
+        .select('id_intrebare')
+        .where('id_test', examen.id_test);
 
-      const scorNou = parseInt(scorQuery.nr_corecte || 0);
+      let scorNou = 0;
+
+      // Pentru fiecare întrebare, verifică dacă răspunsul e corect
+      for (const { id_intrebare } of intrebariTest) {
+        // Răspunsuri corecte pentru această întrebare
+        const correctAnswers = await trx('raspunsuriQ')
+          .select('id_raspunsQ')
+          .where('id_intrebare', id_intrebare)
+          .where('corect', 1);
+
+        const correctIds = correctAnswers.map(r => r.id_raspunsQ).sort();
+
+        // Răspunsuri date de user pentru această întrebare
+        const userAnswers = await trx('raspunsuriXam')
+          .select('raspunsuriXam.id_raspunsQ')
+          .leftJoin('raspunsuriQ', 'raspunsuriXam.id_raspunsQ', 'raspunsuriQ.id_raspunsQ')
+          .where('raspunsuriXam.id_examen', examenId)
+          .where('raspunsuriQ.id_intrebare', id_intrebare)
+          .where('raspunsuriXam.valoare', 1);
+
+        const userIds = userAnswers.map(r => r.id_raspunsQ).sort();
+
+        // Compară: trebuie să fie identice (toate corecte, niciun greșit, niciun lipsă)
+        if (correctIds.length === userIds.length &&
+            correctIds.every((id, index) => id === userIds[index])) {
+          scorNou++;
+        }
+      }
 
       // 5. Update scor în examene
       await trx('examene')
         .where('id_examen', examenId)
         .update({ scor: scorNou });
     });
-
-    // Verifică dacă răspunsul e corect
-    const eCorect = raspunsuriValide.every(r => r.corect === 1) && 
-                    raspunsuriValide.length === raspunsuri.length;
 
     // Găsește răspunsul corect pentru explicație
     const raspunsuriCorecte = await db('raspunsuriQ')
