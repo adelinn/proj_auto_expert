@@ -7,8 +7,6 @@ import Pin from "../components/Pin";
 import CircularProgress from "../components/CircularProgress";
 import { getToken } from "../utils/token";
 import { ArrowUturnRightIcon, CheckCircleIcon, XCircleIcon } from "@heroicons/react/16/solid";
-import { hasAnalyticsConsent } from "../utils/cookieConsent";
-import { trackPageView } from "../utils/analytics";
 
 const API_BASE_URL =
   import.meta?.env?.VITE_API_BASE_URL || "http://localhost:5000/api";
@@ -97,14 +95,6 @@ export default function Quiz() {
     if (quizData?.nume) {
       const newTitle = `Chestionar - ${quizData.nume}`;
       document.title = newTitle;
-      
-      // Re-track page view with updated title for Firebase Analytics
-      if (hasAnalyticsConsent()) {
-        // Small delay to ensure title is set
-        setTimeout(() => {
-          trackPageView(window.location.pathname + window.location.search, newTitle);
-        }, 50);
-      }
     }
   }, [quizData]);
 
