@@ -90,6 +90,14 @@ export default function Quiz() {
     }
   }, [id]);
 
+  // Update document title when quizData changes and re-track page view with updated title
+  useEffect(() => {
+    if (quizData?.nume) {
+      const newTitle = `Chestionar - ${quizData.nume}`;
+      document.title = newTitle;
+    }
+  }, [quizData]);
+
   // Handle answer submission
   async function handleSubmitAnswer(intrebareId, raspunsuriIds) {
     if (

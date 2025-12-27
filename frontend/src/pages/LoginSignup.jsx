@@ -1,7 +1,8 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Button from "../components/Button";
 import { setToken } from '../utils/token';
+import { useAuth } from '../hooks/useAuth';
 import "./LoginSignup.css";
 
 export default function LoginSignup({ initialMode = "login" }) {
@@ -25,8 +26,18 @@ export default function LoginSignup({ initialMode = "login" }) {
   const [formData, setFormData] = useState(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const shouldNavigateRef = useRef(false);
 
   const navigate = useNavigate();
+  const { refreshAuth, isAuthenticated } = useAuth();
+
+  // Navigate when authentication state becomes true after login/signup
+  useEffect(() => {
+    if (shouldNavigateRef.current && isAuthenticated) {
+      shouldNavigateRef.current = false;
+      navigate("/home");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -115,8 +126,12 @@ export default function LoginSignup({ initialMode = "login" }) {
         throw new Error("Răspuns invalid: token lipsă.");
       }
 
+      // Set token and refresh auth state
       setToken(token);
-      navigate("/home");
+      refreshAuth();
+      
+      // Mark that we should navigate once auth state updates
+      shouldNavigateRef.current = true;
     } catch (err) {
       setErrors({ message: err?.message || "A apărut o eroare. Încearcă din nou." });
       console.error(err);

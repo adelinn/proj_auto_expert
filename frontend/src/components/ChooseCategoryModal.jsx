@@ -1,13 +1,7 @@
-import { Dialog } from "@headlessui/react";
+import { Dialog, DialogPanel, DialogTitle, DialogDescription } from "@headlessui/react";
 import { useState, useEffect, useRef, startTransition } from "react";
-
-const CATEGORIES = [
-  { key: "A", emoji: "🏍️", title: "Categoria A", subs: ["AM", "A1", "A2", "A"] },
-  { key: "B", emoji: "🚗", title: "Categoria B", subs: ["B1", "B", "BE"] },
-  { key: "C", emoji: "🚛", title: "Categoria C", subs: ["C1", "C", "CE"] },
-  { key: "D", emoji: "🚌", title: "Categoria D", subs: ["D1", "D", "Tb", "Tv", "DE"] },
-  { key: "Tr", emoji: "🚜", title: "Categoria Tr", subs: [] },
-];
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { CATEGORIES } from "../contexts/categoryModalContext";
 
 export default function ChooseCategoryModal({ open, onClose }) {
   const [selected, setSelected] = useState(null);
@@ -31,6 +25,10 @@ export default function ChooseCategoryModal({ open, onClose }) {
     if (!selected) return;
     localStorage.setItem("userCategory", selected);
     setSelected(null); // Reset state before closing
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event('categoryChanged'));
+    
     onClose?.();
   }
 
@@ -40,9 +38,17 @@ export default function ChooseCategoryModal({ open, onClose }) {
       <div className="fixed inset-0 bg-black/60" aria-hidden="true" />
 
       <div className="flex min-h-full items-center justify-center p-4">
-        <Dialog.Panel className="w-full max-w-3xl rounded-xl bg-white/5 border border-white/6 backdrop-blur-md p-6 text-white shadow-2xl">
-          <Dialog.Title className="text-lg font-semibold mb-2">Alege categoria principală</Dialog.Title>
-          <Dialog.Description className="text-sm text-white/80 mb-6">Selectează o singură categorie. Subcategoriile sunt informative.</Dialog.Description>
+        <DialogPanel className="w-full max-w-3xl rounded-xl bg-white/5 border border-white/6 backdrop-blur-md p-6 text-white shadow-2xl relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-1.5 rounded-md text-white/70 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/20"
+            aria-label="Închide"
+          >
+            <XMarkIcon className="size-5" />
+          </button>
+          
+          <DialogTitle className="text-lg font-semibold mb-2 pr-8">Alege categoria principală</DialogTitle>
+          <DialogDescription className="text-sm text-white/80 mb-6">Selectează o singură categorie. Subcategoriile sunt informative.</DialogDescription>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {CATEGORIES.map((cat) => (
@@ -75,7 +81,7 @@ export default function ChooseCategoryModal({ open, onClose }) {
               Continuă
             </button>
           </div>
-        </Dialog.Panel>
+        </DialogPanel>
       </div>
     </Dialog>
   );

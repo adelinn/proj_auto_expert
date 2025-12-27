@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useCookieConsent } from '../hooks/useCookieConsent';
 import { loadFirebaseAnalytics, removeFirebaseAnalytics } from '../utils/analytics';
 
 export default function CookieBanner() {
+  const location = useLocation();
   const { _consent, hasConsent, acceptCookies: baseAcceptCookies, declineCookies: baseDeclineCookies, isLoading } = useCookieConsent();
   const [isVisible, setIsVisible] = useState(false);
 
@@ -27,6 +28,11 @@ export default function CookieBanner() {
       return () => clearTimeout(timer);
     }
   }, [isLoading, hasConsent]);
+
+  // Don't show banner on privacy policy page
+  if (location.pathname === '/privacy-policy') {
+    return null;
+  }
 
   if (isLoading || hasConsent) {
     return null;

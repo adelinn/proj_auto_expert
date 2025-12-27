@@ -114,7 +114,20 @@ const QuizOptions = forwardRef(function QuizOptions({
         className
       )}
     >
-      <div className={cn("flex flex-col items-center gap-4", optionsClassName)}>
+      {showImage && (
+        <div className="flex justify-center md:justify-end order-1 md:order-2">
+          <img
+            src={`/${imageSrc}`}
+            alt={imageAlt}
+            className={cn(
+              "max-w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl shadow-black/30",
+              imageClassName
+            )}
+          />
+        </div>
+      )}
+
+      <div className={cn("flex flex-col items-center gap-4 order-2 md:order-1", optionsClassName)}>
         {optionChildren.map((child, idx) => {
           const optionId =
             child.props?.id ?? child.props?.value ?? child.props?.["option-id"] ?? `option-${idx}`;
@@ -142,19 +155,6 @@ const QuizOptions = forwardRef(function QuizOptions({
           );
         })}
       </div>
-
-      {showImage && (
-        <div className="flex justify-center md:justify-end">
-          <img
-            src={imageSrc}
-            alt={imageAlt}
-            className={cn(
-              "max-w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl shadow-black/30",
-              imageClassName
-            )}
-          />
-        </div>
-      )}
     </div>
   );
 });
