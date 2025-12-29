@@ -18,6 +18,13 @@ resource "google_firebase_hosting_version" "main" {
   site_id  = google_firebase_hosting_site.main.site_id
   config {
     rewrites {
+      glob = "/api/**"
+      run {
+        service_id = google_cloud_run_v2_service.main.name
+        region     = google_cloud_run_v2_service.main.location
+      }
+    }
+    rewrites {
       glob = "**"
       path = "/index.html"
     }
