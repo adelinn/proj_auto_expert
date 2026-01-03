@@ -23,7 +23,7 @@ export const register = async (req, res) => {
     user = await useri.create({ nume: username, email, parola: password });
 
     const payload = { user: { id: user.id, name: user.nume } };
-    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '39h' }, (err, token) => {
+    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '61D' }, (err, token) => {
       if (err) {
         log.error({ err, userId: user.id }, 'JWT signing error during registration');
         return res.status(500).json({ msg: 'Server error' });
@@ -52,7 +52,7 @@ export const login = async (req, res) => {
     }
 
     const payload = { user: { id: user.id, name: user.nume } };
-    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15h' }, (err, token) => {
+    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '61D' }, (err, token) => {
       if (err) {
         log.error({ err, userId: user.id }, 'JWT signing error during login');
         return res.status(500).json({ msg: 'Server error' });
