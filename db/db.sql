@@ -7,6 +7,19 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+CREATE TABLE IF NOT EXISTS `teste` (
+  `id_test` int unsigned NOT NULL AUTO_INCREMENT,
+  `nume` varchar(50) NOT NULL DEFAULT 'noName',
+  `categorie` varchar(20) NOT NULL,
+  `punctajStart` tinyint unsigned NOT NULL DEFAULT '0',
+  `punctajMinim` tinyint unsigned NOT NULL DEFAULT (0),
+  `timpLimitaS` int unsigned NOT NULL,
+  `enabled` tinyint unsigned NOT NULL DEFAULT '1',
+  `versiune` tinyint unsigned NOT NULL DEFAULT '1',
+  `copyOf` int unsigned DEFAULT NULL,
+  PRIMARY KEY (`id_test`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
+
 CREATE TABLE IF NOT EXISTS `chestionare` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `id_test` int unsigned NOT NULL,
@@ -17,6 +30,15 @@ CREATE TABLE IF NOT EXISTS `chestionare` (
   KEY `chestionare-FK-intrebari` (`id_intrebare`),
   CONSTRAINT `chestionare-FK-intrebari` FOREIGN KEY (`id_intrebare`) REFERENCES `intrebari` (`id_intrebare`) ON UPDATE RESTRICT,
   CONSTRAINT `chestionare-FK-teste` FOREIGN KEY (`id_test`) REFERENCES `teste` (`id_test`) ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE IF NOT EXISTS `intrebari` (
+  `id_intrebare` int unsigned NOT NULL AUTO_INCREMENT,
+  `text` varchar(255) NOT NULL,
+  `categorie` varchar(4) NOT NULL,
+  `id_poza` int unsigned DEFAULT NULL,
+  `tipQ_1xR` tinyint unsigned NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id_intrebare`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `examene` (
@@ -32,15 +54,6 @@ CREATE TABLE IF NOT EXISTS `examene` (
   KEY `examene-FK-teste` (`id_test`),
   CONSTRAINT `examene-FK-teste` FOREIGN KEY (`id_test`) REFERENCES `teste` (`id_test`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `examene-FK-useri` FOREIGN KEY (`id_user`) REFERENCES `useri` (`id_user`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
-
-CREATE TABLE IF NOT EXISTS `intrebari` (
-  `id_intrebare` int unsigned NOT NULL AUTO_INCREMENT,
-  `text` varchar(255) NOT NULL,
-  `categorie` varchar(4) NOT NULL,
-  `id_poza` int unsigned DEFAULT NULL,
-  `tipQ_1xR` tinyint unsigned NOT NULL DEFAULT '1',
-  PRIMARY KEY (`id_intrebare`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `pozeQ` (
@@ -69,18 +82,6 @@ CREATE TABLE IF NOT EXISTS `raspunsuriXam` (
   KEY `raspunsuriXam-FK-raspunsuriQ` (`id_raspunsQ`),
   CONSTRAINT `raspunsuriXam-FK-examene` FOREIGN KEY (`id_examen`) REFERENCES `examene` (`id_examen`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `raspunsuriXam-FK-raspunsuriQ` FOREIGN KEY (`id_raspunsQ`) REFERENCES `raspunsuriQ` (`id_raspunsQ`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
-
-CREATE TABLE IF NOT EXISTS `teste` (
-  `id_test` int unsigned NOT NULL AUTO_INCREMENT,
-  `nume` varchar(50) NOT NULL DEFAULT 'noName',
-  `punctajStart` tinyint unsigned NOT NULL DEFAULT '0',
-  `punctajMinim` tinyint unsigned NOT NULL DEFAULT (0),
-  `timpLimitaS` int unsigned NOT NULL,
-  `enabled` tinyint unsigned NOT NULL DEFAULT '1',
-  `versiune` tinyint unsigned NOT NULL DEFAULT '1',
-  `copyOf` int unsigned DEFAULT NULL,
-  PRIMARY KEY (`id_test`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `useri` (
