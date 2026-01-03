@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `chestionare` (
 
 CREATE TABLE IF NOT EXISTS `intrebari` (
   `id_intrebare` int unsigned NOT NULL AUTO_INCREMENT,
-  `text` varchar(255) NOT NULL,
+  `text` varchar(455) NOT NULL,
   `categorie` varchar(4) NOT NULL,
   `id_poza` int unsigned DEFAULT NULL,
   `tipQ_1xR` tinyint unsigned NOT NULL DEFAULT '1',
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `pozeQ` (
 CREATE TABLE IF NOT EXISTS `raspunsuriQ` (
   `id_raspunsQ` int unsigned NOT NULL AUTO_INCREMENT,
   `id_intrebare` int unsigned NOT NULL,
-  `text` varchar(255) NOT NULL DEFAULT '',
+  `text` varchar(455) NOT NULL DEFAULT '',
   `corect` tinyint unsigned DEFAULT '0',
   PRIMARY KEY (`id_raspunsQ`) USING BTREE,
   KEY `raspunsuriQ-FK-intrebari` (`id_intrebare`),
