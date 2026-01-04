@@ -116,6 +116,35 @@ export default function Quiz() {
         return;
       }
 
+      // Normalize answer IDs to array
+      const normalizedAnswerIds = Array.isArray(raspunsuriIds)
+        ? raspunsuriIds
+        : [raspunsuriIds];
+      let newQuizData;
+
+      // Update quiz data with new answer data
+      if (quizData) {
+        newQuizData = {
+          ...quizData,
+          intrebari: quizData.intrebari.map((intrebare) => {
+            if (intrebare.id === intrebareId) {
+              return {
+                ...intrebare,
+                raspunsuri_date: normalizedAnswerIds,
+              };
+            }
+            return intrebare;
+          }),
+        };
+        setQuizData(newQuizData);
+      }
+
+      // Update selected answers
+      setSelectedAnswers((prev) => ({
+        ...prev,
+        [intrebareId]: normalizedAnswerIds,
+      }));
+
       const response = await fetch(
         `${API_BASE_URL}/chestionar/${id}/intrebare/${intrebareId}`,
         {
@@ -149,18 +178,10 @@ export default function Quiz() {
       // Update quiz data with new score
       if (quizData) {
         setQuizData({
-          ...quizData,
+          ...newQuizData,
           scor_curent: result.scor_total,
         });
       }
-
-      // Update selected answers
-      setSelectedAnswers((prev) => ({
-        ...prev,
-        [intrebareId]: Array.isArray(raspunsuriIds)
-          ? raspunsuriIds
-          : [raspunsuriIds],
-      }));
     } catch (err) {
       console.error("Error submitting answer:", err);
       alert("Eroare la salvarea răspunsului. Vă rugăm să reîncercați.");

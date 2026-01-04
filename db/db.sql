@@ -97,6 +97,14 @@ CREATE TABLE IF NOT EXISTS `useri` (
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- alter table chestionare auto_increment=1;
+-- alter table examene auto_increment=1;
+-- alter table intrebari auto_increment=1;
+-- alter table pozeQ auto_increment=1;
+-- alter table raspunsuriQ auto_increment=1;
+-- alter table raspunsuriXam auto_increment=1;
+-- alter table teste auto_increment=1;
+
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
