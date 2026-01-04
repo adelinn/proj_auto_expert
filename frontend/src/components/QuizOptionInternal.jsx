@@ -70,16 +70,20 @@ const QuizOption = forwardRef(function QuizOption({
   const baseClassesButton =
     "inline-flex items-center gap-2 bg-beige-700/10 backdrop-blur-md font-semibold text-white shadow-inner shadow-white/10 border border-white/20 data-hover:bg-beige-600/15 data-open:bg-beige-700/15 focus:not-data-focus:outline-none data-focus:outline data-focus:outline-white";
   const baseClasses =
-    "w-full max-w-md rounded-xl bg-white/5 p-6 max-md:p-3 backdrop-blur-2xl duration-300 ease-out data-closed:transform-[scale(95%)] data-closed:opacity-0";
+    "w-full rounded-xl bg-white/5 p-6 max-md:p-3 backdrop-blur-2xl duration-300 ease-out data-closed:transform-[scale(95%)] data-closed:opacity-0";
 
   // Combine all classes
   const cardClasses = cn(baseClasses, className);
   const buttonClasses = cn(baseClassesButton, textSizeVariantClasses[size], sizeVariantLetterClasses[size], borderRadius);
 
   return (
-    <div className="relative z-10 w-full max-w-md " {...props}>
+    <div className="relative z-10 w-full " {...props}>
       <div
-        className={cn(cardClasses, "inline-flex items-center gap-4")}
+        className={cn(cardClasses, "inline-flex items-center gap-4 cursor-pointer hover:bg-white/10 transition-colors")}
+        onClick={activate}
+        role="button"
+        tabIndex="0"
+        aria-label={`Select option ${letter}: ${typeof children === 'string' ? children : 'option'}`}
       >
         <div className="shrink-0">
           <Btn
@@ -88,7 +92,7 @@ const QuizOption = forwardRef(function QuizOption({
               "font-bold leading-none",
               isSelected ? "ring-2 ring-white/60" : false
             )}
-            onClick={activate}
+            tabIndex="-1"
           >
             {letter[0].toLocaleUpperCase()}
           </Btn>
@@ -96,7 +100,7 @@ const QuizOption = forwardRef(function QuizOption({
         <p
           className={cn(
             textSizeClasses[size],
-            "m-0 text-left text-white/70"
+            "m-0 text-left text-white/70 flex-1"
           )}
         >
           {children}

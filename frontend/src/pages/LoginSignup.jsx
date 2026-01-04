@@ -31,6 +31,9 @@ export default function LoginSignup({ initialMode = "login" }) {
   const navigate = useNavigate();
   const { refreshAuth, isAuthenticated } = useAuth();
 
+  if (isAuthenticated)
+    navigate("/home");
+
   // Navigate when authentication state becomes true after login/signup
   useEffect(() => {
     if (shouldNavigateRef.current && isAuthenticated) {

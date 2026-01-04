@@ -106,18 +106,25 @@ const QuizOptions = forwardRef(function QuizOptions({
   // Store refs to all QuizOptionInternal components to access their isSelected state
   const optionRefs = useRef({});
 
+  // Determine grid columns based on layout and image presence
+  const gridCols = layout === "split" 
+    ? (showImage ? "md:grid-cols-2" : "md:grid-cols-1")
+    : null;
+
   return (
     <div
       className={cn(
         "w-full",
-        layout === "split" ? "grid gap-6 md:grid-cols-2 items-start" : "flex flex-col gap-6",
+        layout === "split" 
+          ? `grid gap-6 ${gridCols} items-center` 
+          : "flex flex-col gap-6",
         className
       )}
     >
       {showImage && (
         <div className="flex justify-center md:justify-end order-1 md:order-2">
           <img
-            src={`/${imageSrc}`}
+            src={`${imageSrc}`}
             alt={imageAlt}
             className={cn(
               "max-w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl shadow-black/30",
