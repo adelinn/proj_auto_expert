@@ -22,43 +22,51 @@ export const getChestionare = async (req, res, next) => {
       .where('examene.id_user', userId)
       .orderBy('examene.data', 'desc');
 
-    // Pentru fiecare examen, calculează statistici
-    const results = await Promise.all(
-      examene.map(async (examen) => {
-        // Număr total de întrebări din test
-        const [{ total }] = await db('chestionare')
-          .count('* as total')
-          .where('id_test', examen.id_test);
+    if (examene.length === 0) {
+      return res.json([]);
+    }
 
-        // Număr de întrebări răspunse (distinct)
-        const raspunseQuery = await db('raspunsuriXam')
-          .countDistinct('raspunsuriQ.id_intrebare as nr_raspunse')
-          .leftJoin('raspunsuriQ', 'raspunsuriXam.id_raspunsQ', 'raspunsuriQ.id_raspunsQ')
-          .where('raspunsuriXam.id_examen', examen.id_examen)
-          .where('raspunsuriXam.valoare', 1)
-          .first();
+    // OPTIMIZAT: Batch fetch toate statisticile într-o singură rundă
+    const examenIds = examene.map(e => e.id_examen);
+    const testIds = [...new Set(examene.map(e => e.id_test))];
 
-        // Număr de răspunsuri corecte
-        const corecteQuery = await db('raspunsuriXam')
-          .count('* as nr_corecte')
-          .leftJoin('raspunsuriQ', 'raspunsuriXam.id_raspunsQ', 'raspunsuriQ.id_raspunsQ')
-          .where('raspunsuriXam.id_examen', examen.id_examen)
-          .where('raspunsuriXam.valoare', 1)
-          .where('raspunsuriQ.corect', 1)
-          .first();
+    // 1. Fetch toate numerele de întrebări pentru toate testele într-o singură interogare
+    const intrebariPerTest = await db('chestionare')
+      .select('id_test')
+      .count('* as total')
+      .whereIn('id_test', testIds)
+      .groupBy('id_test');
 
-        return {
-          id: examen.id_examen,
-          nume: examen.nume,
-          nr_intrebari: parseInt(total),
-          nr_raspunse: parseInt(raspunseQuery?.nr_raspunse || 0),
-          nr_corecte: parseInt(corecteQuery?.nr_corecte || 0),
-          scor: examen.scor,
-          data: examen.data,
-          inceput: examen.start_time !== null
-        };
-      })
-    );
+    const intrebariPerTestObj = {};
+    for (const row of intrebariPerTest) {
+      intrebariPerTestObj[row.id_test] = parseInt(row.total);
+    }
+
+    // 2. Fetch toate întrebările răspunse pentru toate examenele într-o singură interogare
+    const raspunsePerExamen = await db('raspunsuriXam')
+      .select('raspunsuriXam.id_examen')
+      .countDistinct('raspunsuriQ.id_intrebare as nr_raspunse')
+      .leftJoin('raspunsuriQ', 'raspunsuriXam.id_raspunsQ', 'raspunsuriQ.id_raspunsQ')
+      .whereIn('raspunsuriXam.id_examen', examenIds)
+      .where('raspunsuriXam.valoare', 1)
+      .groupBy('raspunsuriXam.id_examen');
+
+    const raspunsePerExamenObj = {};
+    for (const row of raspunsePerExamen) {
+      raspunsePerExamenObj[row.id_examen] = parseInt(row.nr_raspunse || 0);
+    }
+
+    // Construiește rezultatele folosind datele batch-fetch-uite
+    const results = examene.map((examen) => ({
+      id: examen.id_examen,
+      nume: examen.nume,
+      nr_intrebari: intrebariPerTestObj[examen.id_test] || 0,
+      nr_raspunse: raspunsePerExamenObj[examen.id_examen] || 0,
+      nr_corecte: examen.scor,
+      scor: examen.scor,
+      data: examen.data,
+      inceput: examen.start_time !== null
+    }));
 
     res.json(results);
   } catch (err) {
@@ -306,6 +314,7 @@ export const answerQuestion = async (req, res, next) => {
                     raspunsuriIdsCorecteSet.difference(raspunsuriIdsSelectateSet).size == 0;
 
     // TRANSACȚIE: șterge răspunsuri vechi + inserează noi + update scor
+    let scorNou = 0;
     await db.transaction(async (trx) => {
       // 1. Șterge răspunsurile vechi pentru această întrebare (optimizat: fără subquery)
       if (raspunsuriIdsToDelete.length > 0) {
@@ -372,7 +381,6 @@ export const answerQuestion = async (req, res, next) => {
       }
 
       // Calculează scorul comparând răspunsurile - OPTIMIZAT: Set equality (O(n) în loc de O(n log n))
-      let scorNou = 0;
       for (const id_intrebare of intrebareIds) {
         const correctSet = raspunsCorectePeIntrebare.get(id_intrebare) || new Set();
         const userSet = raspunsUserPeIntrebare.get(id_intrebare) || new Set();
@@ -398,15 +406,9 @@ export const answerQuestion = async (req, res, next) => {
           .whereIn('id_raspunsQ', Array.from(raspunsuriIdsCorecteSet))
       : [];
 
-    // Scor actualizat
-    const examenActualizat = await db('examene')
-      .select('scor')
-      .where('id_examen', examenId)
-      .first();
-
     res.json({
       corect: eCorect,
-      scor_total: examenActualizat.scor,
+      scor_total: scorNou,
       explicatie: eCorect 
         ? 'Răspuns corect!' 
         : `Răspunsul corect: ${raspunsuriCorecte.map(r => r.text).join(', ')}`
