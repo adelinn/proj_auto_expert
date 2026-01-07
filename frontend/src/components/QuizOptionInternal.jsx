@@ -90,7 +90,7 @@ const QuizOption = forwardRef(function QuizOption({
             className={cn(
               buttonClasses,
               "font-bold leading-none",
-              isSelected ? "ring-2 ring-white/60" : false
+              isSelected ? "ring-5 ring-amber-100/80" : false
             )}
             tabIndex="-1"
           >

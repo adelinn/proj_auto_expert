@@ -401,12 +401,12 @@ export default function Quiz() {
         {/* Current question */}
         {currentQuestion && (
           <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-4">
+            <h2 className="text-2xl font-semibold mb-4">
               {currentQuestion.text}
             </h2>
 
             <QuizOptions
-              size="md"
+              size="lg"
               imageSrc={currentQuestion.poza_url || ""}
               imageAlt="Întrebare"
               // We default to true for now to be consistent with official tester behavior
@@ -429,7 +429,7 @@ export default function Quiz() {
         )}
 
         {/* Action buttons */}
-        <div className="flex justify-center gap-4 mt-6 pb-4">
+        <div className="flex justify-center gap-4 mt-6 pb-4 text-lg">
           <button
             onClick={() => {
               // Answer later - just move to next question
@@ -438,7 +438,7 @@ export default function Quiz() {
             disabled={currentQuestionIndex === totalQuestions - 1 || isSubmitting}
             className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white/90 transition-colors"
           >
-            <ArrowUturnRightIcon className="size-5"/><span className="max-md:text-xs">Răspunde mai târziu</span>
+            <ArrowUturnRightIcon className="size-9"/><span className="max-md:text-sm">Răspunde mai târziu</span>
           </button>
           
           <button
@@ -455,7 +455,7 @@ export default function Quiz() {
             disabled={!selectedAnswers[currentQuestion?.id] || isSubmitting}
             className="inline-flex items-center gap-2 px-4 py-2 bg-racingred-700/60 hover:bg-racingred-700/80 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white/90 transition-colors"
           >
-            <XCircleIcon className="size-5"/><span className="max-md:hidden">Modifică răspunsul</span>
+            <XCircleIcon className="size-9"/><span className="max-md:hidden">Modifică răspunsul</span>
           </button>
           
           <button
@@ -472,7 +472,7 @@ export default function Quiz() {
             disabled={!selectedAnswers[currentQuestion?.id] || isSubmitting}
             className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 hover:from-blue-600 hover:via-cyan-600 hover:to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-semibold transition-all shadow-lg shadow-blue-500/20"
           >
-            <CheckCircleIcon className="size-5"/><span className="max-md:hidden">Trimite răspunsul</span>
+            <CheckCircleIcon className="size-9"/><span className="max-md:hidden">Trimite răspunsul</span>
           </button>
         </div>
 
