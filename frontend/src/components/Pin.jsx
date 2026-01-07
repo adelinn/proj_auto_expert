@@ -32,9 +32,14 @@ const Pin = forwardRef(function Pin({
     lg: "size-6",
   };
 
-  // Base classes
-  const baseClasses =
-    "inline-flex items-center gap-2 select-none bg-beige-700/10 backdrop-blur-md font-semibold text-beige-100/90 shadow-lg shadow-black/10 border border-white/20 data-hover:bg-beige-200/15 data-active:outline-none data-hover:data-active:bg-beige-600/15 transition-all duration-200";
+  // Default styles
+  let baseClasses =
+    "inline-flex items-center gap-2 select-none backdrop-blur-md font-semibold shadow-lg shadow-black/10 border border-white/20 data-active:outline-none transition-all duration-200";
+  if (className.indexOf(" bg-") > -1 || className.indexOf("bg-") === 0)
+    baseClasses += " bg-beige-700/10 data-hover:bg-beige-200/15 data-hover:data-active:bg-beige-600/15";
+  if (className.indexOf(" text-") > -1 || className.indexOf("text-") === 0)
+    baseClasses += " text-white/70";
+
 
   // Combine all classes
   const buttonClasses = cn(
@@ -61,8 +66,8 @@ const Pin = forwardRef(function Pin({
         Icon = null;
         break;
     }
-    if (Icon != null) return <Icon className={`${iconSizeClasses[size]} text-white/70`} />;
-    else return <span className={`${iconSizeClasses[size]} text-white/70`}>{children}</span>;
+    if (Icon != null) return <Icon className={`${iconSizeClasses[size]}`} />;
+    else return <span className={`${iconSizeClasses[size]}`}>{children}</span>;
   };
 
   // Add role="button" and tabIndex if onClick is provided but not explicitly set
