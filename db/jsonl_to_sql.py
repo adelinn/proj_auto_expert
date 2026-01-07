@@ -5,6 +5,7 @@ import json
 import sys
 from pathlib import Path
 from collections import defaultdict
+import copy
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -71,12 +72,16 @@ def main():
             line = line.strip()
             if line:
                 questions.append(json.loads(line))
+    # print("Aaaaaaa\n", len(questions), "\nAaaaaaaaaaa")
 
     # -------- Group questions by test group --------
     grouped_questions = defaultdict(list)
     for q in questions:
         cat = q["category"]
         grouped_questions[TEST_DEFS[cat]["group"]].append(q)
+    # print("Aaaaaaa\n", len(grouped_questions["B, B1, Tr"]), "\nAaaaaaaaaaa")
+    # exit()
+    grouped_questions_orig = copy.deepcopy(grouped_questions)
 
     sql = []
     sql.append(
@@ -103,20 +108,24 @@ def main():
 
         td = TEST_DEFS[qs[0]["category"]]
 
-        sql.append(
-            f"""INSERT INTO teste
-(nume, categorie, punctajStart, punctajMinim, timpLimitaS, versiune)
-VALUES (
-{esc(test_name)},
-{esc(group)},
-0,
-{td["min"]},
-{td["time"]},
-1
-);\n"""
-        )
+#         sql.append(
+#             f"""INSERT INTO teste
+# (nume, categorie, punctajStart, punctajMinim, timpLimitaS, versiune)
+# VALUES (
+# {esc(test_name)},
+# {esc(group)},
+# 0,
+# {td["min"]},
+# {td["time"]},
+# 1
+# );\n"""
+#         )
 
         grouped_questions[group] = qs[:required]  # enforce exact count
+
+    for group, qs in grouped_questions_orig.items():
+        required = TEST_DEFS[qs[0]["category"]]["nr"]
+        grouped_questions_orig[group] = qs[required:]
 
     # -------- Insert questions / answers --------
     img_map = {}
@@ -151,11 +160,60 @@ VALUES (
 );\n"""
             )
 
+#             sql.append(
+#                 f"""INSERT INTO chestionare
+# (id_test, id_intrebare, valoareQ)
+# VALUES ({test_ids[group]}, {q_id}, 1);\n"""
+#             )
+
+            # Answers
+            correct = parse_answer_mask(int(q["answer"]))
+            answers = [q["textA"], q["textB"], q["textC"]]
+
+            for i, txt in enumerate(answers):
+                sql.append(
+                    f"""INSERT INTO raspunsuriQ
+(id_intrebare, text, corect)
+VALUES (
+{q_id},
+{esc(txt)},
+{correct[i]}
+);\n"""
+                )
+
+    for group, qs in grouped_questions_orig.items():
+        for q in qs:
+            # Image
+            if q.get("imageUrl"):
+                uri = extract_image_uri(q["imageUrl"])
+                if uri not in img_map:
+                    img_id += 1
+                    img_map[uri] = img_id
+                    sql.append(
+                        f"INSERT INTO pozeQ (uri) VALUES ({esc(uri)});\n"
+                    )
+                id_poza = img_map[uri]
+            else:
+                id_poza = "NULL"
+
+            # Question
+            q_id += 1
             sql.append(
-                f"""INSERT INTO chestionare
-(id_test, id_intrebare, valoareQ)
-VALUES ({test_ids[group]}, {q_id}, 1);\n"""
+                f"""INSERT INTO intrebari
+(text, categorie, id_poza, tipQ_1xR)
+VALUES (
+{esc(q["text"])},
+{esc(q["category"])},
+{id_poza},
+1
+);\n"""
             )
+
+#             sql.append(
+#                 f"""INSERT INTO chestionare
+# (id_test, id_intrebare, valoareQ)
+# VALUES ({test_ids[group]}, {q_id}, 1);\n"""
+#             )
 
             # Answers
             correct = parse_answer_mask(int(q["answer"]))

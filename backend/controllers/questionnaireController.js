@@ -1,6 +1,29 @@
 import db from '../config/db.js';
 import logger from '../server/logger.js';
 import * as exameneRepo from '../repositories/examene.js';
+import * as testeRepo from '../repositories/teste.js';
+
+// Test definitions based on category (matching jsonl_to_sql.py)
+const TEST_DEFS = {
+  "A":  { group: "A, A1, A2, AM", nr: 20, time: 20, min: 17, mainCategory: "A" },
+  "A1": { group: "A, A1, A2, AM", nr: 20, time: 20, min: 17, mainCategory: "A" },
+  "A2": { group: "A, A1, A2, AM", nr: 20, time: 20, min: 17, mainCategory: "A" },
+  "AM": { group: "A, A1, A2, AM", nr: 20, time: 20, min: 17, mainCategory: "A" },
+  
+  "B":  { group: "B, B1, Tr", nr: 26, time: 30, min: 22, mainCategory: "B" },
+  "B1": { group: "B, B1, Tr", nr: 26, time: 30, min: 22, mainCategory: "B" },
+  "Tr": { group: "B, B1, Tr", nr: 26, time: 30, min: 22, mainCategory: "B" },
+  
+  "C":  { group: "C, C1", nr: 26, time: 30, min: 22, mainCategory: "C" },
+  "C1": { group: "C, C1", nr: 26, time: 30, min: 22, mainCategory: "C" },
+  
+  "D":  { group: "D, D1, Tb, Tv", nr: 26, time: 30, min: 22, mainCategory: "D" },
+  "D1": { group: "D, D1, Tb, Tv", nr: 26, time: 30, min: 22, mainCategory: "D" },
+  "Tb": { group: "D, D1, Tb, Tv", nr: 26, time: 30, min: 22, mainCategory: "D" },
+  "Tv": { group: "D, D1, Tb, Tv", nr: 26, time: 30, min: 22, mainCategory: "D" },
+  
+  "E": { group: "BE, CE, DE", nr: 11, time: 15, min: 9, mainCategory: "E" },
+};
 
 // GET /api/chestionare - Lista toate chestionarele utilizatorului
 export const getChestionare = async (req, res, next) => {
@@ -75,64 +98,106 @@ export const getChestionare = async (req, res, next) => {
   }
 };
 
-// POST /api/chestionare - Creează un chestionar nou (examen)
+// POST /api/chestionare - Creează un chestionar nou (examen) cu întrebări aleatoare
 export const createChestionar = async (req, res, next) => {
   const log = req?.log || logger;
   const userId = req.user.id;
-  const { categorie } = req.body; // Optional category filter
+  const { categorie } = req.body; // Required category to determine test parameters
 
   try {
-    // Build query for available tests
-    let query = db('teste')
-      .select('teste.*')
-      .where('teste.enabled', 1)
-      .whereNotIn('teste.id_test', function () {
-        this.select('id_test')
-          .from('examene')
-          .where('id_user', userId);
-      });
-
-    // Filter by category if provided
-    if (categorie) {
-      // Filter tests that have questions with the matching category
-      // Join through chestionare to intrebari to check the categorie field
-      query = query
-        .innerJoin('chestionare', 'teste.id_test', 'chestionare.id_test')
-        .innerJoin('intrebari', 'chestionare.id_intrebare', 'intrebari.id_intrebare')
-        .where('intrebari.categorie', categorie)
-        .groupBy('teste.id_test'); // Group by test to avoid duplicates
-    }
-
-    // Găsește primul test enabled care NU a fost făcut de user
-    const testDisponibil = await query
-      .orderBy('teste.id_test')
-      .first();
-
-    if (!testDisponibil) {
-      return res.status(404).json({ 
-        msg: 'Nu mai există chestionare disponibile. Ai completat toate testele!' 
+    // Verifică dacă categoria este validă și obține definiția testului
+    if (!categorie || !TEST_DEFS.hasOwnProperty(categorie)) {
+      return res.status(400).json({
+        msg: `Categorie invalidă. Categorii disponibile: ${Object.keys(TEST_DEFS).join(', ')}`
       });
     }
+
+    const testDef = TEST_DEFS[categorie];
+    const nr_intrebari = testDef.nr;
+    // Găsește toate testele pe care user-ul le-a făcut deja
+    const exameneUser = await db('examene')
+      .select('id_test')
+      .where('id_user', userId)
+      .distinct();
+
+    const userTestIds = exameneUser.map(e => e.id_test);
+
+    // Găsește toate întrebările care sunt deja în testele user-ului
+    let intrebariFolositeQuery = db('chestionare')
+      .select('id_intrebare')
+      .distinct();
+
+    if (userTestIds.length > 0) {
+      intrebariFolositeQuery = intrebariFolositeQuery.whereIn('id_test', userTestIds);
+    } else {
+      // Dacă user-ul nu are testele, returnează un array gol pentru a evita eroarea SQL
+      intrebariFolositeQuery = intrebariFolositeQuery.whereRaw('1 = 0');
+    }
+
+    const intrebariFolosite = await intrebariFolositeQuery;
+    const intrebariFolositeIds = intrebariFolosite.map(i => i.id_intrebare);
+
+    // Găsește întrebări disponibile (care nu sunt în testele user-ului)
+    let intrebariDisponibileQuery = db('intrebari')
+      .select('id_intrebare')
+      .where('categorie', testDef.mainCategory);
+
+    if (intrebariFolositeIds.length > 0) {
+      intrebariDisponibileQuery = intrebariDisponibileQuery.whereNotIn('id_intrebare', intrebariFolositeIds);
+    }
+
+    const intrebariDisponibile = await intrebariDisponibileQuery.limit(nr_intrebari*7);
+
+    // Verifică dacă există suficiente întrebări disponibile
+    if (intrebariDisponibile.length < nr_intrebari) {
+      return res.status(404).json({
+        msg: "Testele tale deja includ toate întrebările disponibile."
+      });
+    }
+
+    // Selectează întrebări aleatoare
+    const intrebariSelectate = [];
+    const intrebariDisponibileShuffled = [...intrebariDisponibile].sort(() => Math.random() - 0.5);
+    
+    for (let i = 0; i < nr_intrebari; i++) {
+      intrebariSelectate.push(intrebariDisponibileShuffled[i].id_intrebare);
+    }
+
+    // Creează un test nou folosind definiția din TEST_DEFS
+    const testNou = await testeRepo.create({
+      nume: `${testDef.group} - Set *${userTestIds.length+1}`,
+      punctajStart: 0,
+      punctajMinim: testDef.min,
+      timpLimitaS: testDef.time,
+      enabled: 1,
+      versiune: 2,
+      copyOf: null,
+      categorie: testDef.mainCategory
+    });
+
+    // Adaugă întrebările în test (chestionare)
+    const chestionareData = intrebariSelectate.map(id_intrebare => ({
+      id_test: testNou.id,
+      id_intrebare: id_intrebare,
+      valoareQ: 1 // Valoare implicită pentru întrebare
+    }));
+
+    await db('chestionare').insert(chestionareData);
 
     // Creează examenul nou
     const examenNou = await exameneRepo.create({
       id_user: userId,
-      id_test: testDisponibil.id_test,
-      data: new Date().toISOString().split('T')[0], // YYYY-MM-DD
-      start_time: null,
+      id_test: testNou.id,
+      data: db.fn.now(),
+      start_time: db.fn.now(),
       scor: null,
-      durata: testDisponibil.timpLimitaS
+      durata: testNou.timpLimitaS
     });
-
-    // Număr total de întrebări din test
-    const [{ total }] = await db('chestionare')
-      .count('* as total')
-      .where('id_test', testDisponibil.id_test);
 
     res.status(201).json({
       id: examenNou.id,
-      nume: testDisponibil.nume,
-      nr_intrebari: parseInt(total),
+      nume: testNou.nume,
+      nr_intrebari: intrebariSelectate.length,
       nr_raspunse: 0,
       nr_corecte: 0,
       scor: null,
