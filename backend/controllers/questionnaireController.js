@@ -262,7 +262,7 @@ export const answerQuestion = async (req, res, next) => {
       .select('tipQ_1xR')
       .where('id_intrebare', intrebareId)
       .first();
-
+    
     if (!intrebare) {
       return res.status(404).json({ msg: 'Întrebarea nu a fost găsită' });
     }
@@ -275,43 +275,45 @@ export const answerQuestion = async (req, res, next) => {
     //   });
     // }
 
-    // Verifică că toate răspunsurile aparțin acestei întrebări
-    const raspunsuriValide = await db('raspunsuriQ')
+    // Obține TOATE răspunsurile pentru această întrebare (pentru validare, ștergere și răspunsuri corecte) - OPTIMIZAT: 1 query în loc de 3
+    const toateRaspunsuriIntrebare = await db('raspunsuriQ')
       .select('id_raspunsQ', 'corect')
-      .where('id_intrebare', intrebareId)
-      .whereIn('id_raspunsQ', raspunsuri);
+      .where('id_intrebare', intrebareId);
 
-    if (raspunsuriValide.length !== raspunsuri.length) {
+    // Verifică că toate răspunsurile selectate aparțin acestei întrebări - OPTIMIZAT
+    const raspunsuriIdsIntrebare = toateRaspunsuriIntrebare.map(r => r.id_raspunsQ);
+    const raspunsuriIdsIntrebareSet = new Set(raspunsuriIdsIntrebare);
+    const raspunsuriIdsSelectateSet = new Set(raspunsuri);
+    const raspunsuriInvalideSet = raspunsuriIdsSelectateSet.difference(raspunsuriIdsIntrebareSet);
+    
+    if (raspunsuriInvalideSet.size > 0) {
       return res.status(400).json({ msg: 'Răspunsuri invalide' });
     }
 
-    // IMPORTANT: Găsește TOATE răspunsurile corecte pentru această întrebare
-    const toateRaspunsuriCorecte = await db('raspunsuriQ')
-      .select('id_raspunsQ')
-      .where('id_intrebare', intrebareId)
-      .where('corect', 1);
+    // Obține ID-urile pentru ștergere mai tarziu
+    const raspunsuriIdsToDelete = raspunsuriIdsIntrebare;
 
-    const idsCorecte = toateRaspunsuriCorecte.map(r => r.id_raspunsQ).sort();
-    const idsSelectate = [...raspunsuri].sort();
+    // IMPORTANT: Găsește TOATE răspunsurile corecte pentru această întrebare - OPTIMIZAT: Set pentru comparație eficientă
+    const raspunsuriIdsCorecteSet = new Set(
+      toateRaspunsuriIntrebare
+        .filter(r => r.corect === 1)
+        .map(r => r.id_raspunsQ)
+    );
 
-    // Verifică dacă răspunsul e corect:
-    // 1. Toate răspunsurile selectate trebuie să fie corecte
-    // 2. Numărul de răspunsuri selectate trebuie să fie egal cu numărul de răspunsuri corecte
-    // 3. ID-urile trebuie să fie identice
-    const eCorect = idsCorecte.length === idsSelectate.length &&
-                    idsCorecte.every((id, index) => id === idsSelectate[index]);
+    // Verifică dacă răspunsul e corect - OPTIMIZAT: Set equality check (O(n) în loc de O(n log n) cu sort)
+    // Seturile sunt egale dacă au aceeași dimensiune și toate elementele din unul sunt în celălalt
+    const eCorect = raspunsuriIdsCorecteSet.size === raspunsuriIdsSelectateSet.size &&
+                    raspunsuriIdsCorecteSet.difference(raspunsuriIdsSelectateSet).size == 0;
 
     // TRANSACȚIE: șterge răspunsuri vechi + inserează noi + update scor
     await db.transaction(async (trx) => {
-      // 1. Șterge răspunsurile vechi pentru această întrebare
-      await trx('raspunsuriXam')
-        .whereIn('id_raspunsQ', function() {
-          this.select('id_raspunsQ')
-            .from('raspunsuriQ')
-            .where('id_intrebare', intrebareId);
-        })
-        .where('id_examen', examenId)
-        .del();
+      // 1. Șterge răspunsurile vechi pentru această întrebare (optimizat: fără subquery)
+      if (raspunsuriIdsToDelete.length > 0) {
+        await trx('raspunsuriXam')
+          .whereIn('id_raspunsQ', raspunsuriIdsToDelete)
+          .where('id_examen', examenId)
+          .del();
+      }
 
       // 2. Inserează noile răspunsuri
       const insertData = raspunsuri.map(id_raspunsQ => ({
@@ -328,39 +330,57 @@ export const answerQuestion = async (req, res, next) => {
           .update({ start_time: trx.fn.now() });
       }
 
-      // 4. Recalculează scorul total
-      // Numără întrebările la care userul a răspuns COMPLET CORECT
-      
+      // 4. Recalculează scorul total - OPTIMIZAT: 2 interogări în loc de O(n)
       // Găsește toate întrebările din test
       const intrebariTest = await trx('chestionare')
         .select('id_intrebare')
         .where('id_test', examen.id_test);
 
+      const intrebareIds = intrebariTest.map(i => i.id_intrebare);
+
+      // Fetch TOATE răspunsurile corecte pentru TOATE întrebările din test într-o singură interogare
+      const toateRaspunsuriCorecte = await trx('raspunsuriQ')
+        .select('id_raspunsQ', 'id_intrebare')
+        .whereIn('id_intrebare', intrebareIds)
+        .where('corect', 1);
+
+      // Fetch TOATE răspunsurile date de user pentru acest examen într-o singură interogare
+      const toateRaspunsuriUser = await trx('raspunsuriXam')
+        .select('raspunsuriXam.id_raspunsQ', 'raspunsuriQ.id_intrebare')
+        .leftJoin('raspunsuriQ', 'raspunsuriXam.id_raspunsQ', 'raspunsuriQ.id_raspunsQ')
+        .where('raspunsuriXam.id_examen', examenId)
+        .where('raspunsuriXam.valoare', 1)
+        .whereIn('raspunsuriQ.id_intrebare', intrebareIds);
+
+      // Grupează răspunsurile corecte pe întrebare - OPTIMIZAT: Map pentru performanță mai bună
+      const raspunsCorectePeIntrebare = new Map();
+      for (const r of toateRaspunsuriCorecte) {
+        if (!raspunsCorectePeIntrebare.has(r.id_intrebare)) {
+          raspunsCorectePeIntrebare.set(r.id_intrebare, new Set());
+        }
+        raspunsCorectePeIntrebare.get(r.id_intrebare).add(r.id_raspunsQ);
+      }
+
+      // Grupează răspunsurile user pe întrebare - OPTIMIZAT: Map cu Set-uri
+      const raspunsUserPeIntrebare = new Map();
+      for (const r of toateRaspunsuriUser) {
+        if (!r.id_intrebare) continue; // Skip if join failed
+        if (!raspunsUserPeIntrebare.has(r.id_intrebare)) {
+          raspunsUserPeIntrebare.set(r.id_intrebare, new Set());
+        }
+        raspunsUserPeIntrebare.get(r.id_intrebare).add(r.id_raspunsQ);
+      }
+
+      // Calculează scorul comparând răspunsurile - OPTIMIZAT: Set equality (O(n) în loc de O(n log n))
       let scorNou = 0;
-
-      // Pentru fiecare întrebare, verifică dacă răspunsul e corect
-      for (const { id_intrebare } of intrebariTest) {
-        // Răspunsuri corecte pentru această întrebare
-        const correctAnswers = await trx('raspunsuriQ')
-          .select('id_raspunsQ')
-          .where('id_intrebare', id_intrebare)
-          .where('corect', 1);
-
-        const correctIds = correctAnswers.map(r => r.id_raspunsQ).sort();
-
-        // Răspunsuri date de user pentru această întrebare
-        const userAnswers = await trx('raspunsuriXam')
-          .select('raspunsuriXam.id_raspunsQ')
-          .leftJoin('raspunsuriQ', 'raspunsuriXam.id_raspunsQ', 'raspunsuriQ.id_raspunsQ')
-          .where('raspunsuriXam.id_examen', examenId)
-          .where('raspunsuriQ.id_intrebare', id_intrebare)
-          .where('raspunsuriXam.valoare', 1);
-
-        const userIds = userAnswers.map(r => r.id_raspunsQ).sort();
+      for (const id_intrebare of intrebareIds) {
+        const correctSet = raspunsCorectePeIntrebare.get(id_intrebare) || new Set();
+        const userSet = raspunsUserPeIntrebare.get(id_intrebare) || new Set();
 
         // Compară: trebuie să fie identice (toate corecte, niciun greșit, niciun lipsă)
-        if (correctIds.length === userIds.length &&
-            correctIds.every((id, index) => id === userIds[index])) {
+        // Set equality: aceeași dimensiune și toate elementele din unul sunt în celălalt
+        if (correctSet.size === userSet.size &&
+            correctSet.difference(userSet).size == 0) {
           scorNou++;
         }
       }
@@ -371,11 +391,12 @@ export const answerQuestion = async (req, res, next) => {
         .update({ scor: scorNou });
     });
 
-    // Găsește răspunsul corect pentru explicație
-    const raspunsuriCorecte = await db('raspunsuriQ')
-      .select('text')
-      .where('id_intrebare', intrebareId)
-      .where('corect', 1);
+    // Găsește răspunsul corect pentru explicație - OPTIMIZAT: folosește Set-ul deja creat
+    const raspunsuriCorecte = raspunsuriIdsCorecteSet.size > 0
+      ? await db('raspunsuriQ')
+          .select('text')
+          .whereIn('id_raspunsQ', Array.from(raspunsuriIdsCorecteSet))
+      : [];
 
     // Scor actualizat
     const examenActualizat = await db('examene')
