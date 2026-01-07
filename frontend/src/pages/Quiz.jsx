@@ -554,7 +554,7 @@ export default function Quiz() {
         </div>
 
         {isSubmitting && (
-          <div className="fixed bottom-4 right-4 bg-white/10 backdrop-blur-xl rounded-lg px-4 py-2 flex items-center gap-2">
+          <div className="fixed z-100 bottom-4 right-4 bg-white/10 backdrop-blur-xl rounded-lg px-4 py-2 flex items-center gap-2">
             <Spinner size="sm" />
             <span className="text-sm text-white/90">Se salvează...</span>
           </div>
