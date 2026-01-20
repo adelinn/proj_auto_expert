@@ -89,7 +89,9 @@ export const getChestionare = async (req, res, next) => {
       scor: examen.scor,
       data: examen.data,
       inceput: examen.start_time !== null
-    }));
+    })).sort(function(a, b) { 
+      return a.id - b.id;
+    });
 
     res.json(results);
   } catch (err) {
